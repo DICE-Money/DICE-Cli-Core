@@ -73,8 +73,8 @@ _Method.setValidZeros = function (byte) {
 _Method.setSwatchTime = function (float) {
     var buf_U32 = new Uint32Array(1);
     if (null !== float.length) {
-        buf_U32[0] = float;
-        this.swatchTime = new Uint8Array(buf_U32.buffer);
+        buf_U32[0] = parseInt(Math.round(float));
+        this.swatchTime = new Uint8Array(buf_U32.buffer).reverse();
     } else {
         throw "Error Invalid Swatch Time!";
     }

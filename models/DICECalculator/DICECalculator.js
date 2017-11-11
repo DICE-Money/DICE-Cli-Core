@@ -85,8 +85,7 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
     var validHexValue = cArrayValidHex[peiesOfChunks];
 
     //Reverse Hash of Prototype 
-    var buffer = new Buffer(SHA_DICEPrototype, "hex");
-    SHA_DICEPrototype = Buffer.from(new Uint8Array(buffer).reverse()).toString('hex');
+    SHA_DICEPrototype = SHA_DICEPrototype.split('').reverse().join('');
 
 
     var hexChar = SHA_DICEPrototype.charAt(chunks);
