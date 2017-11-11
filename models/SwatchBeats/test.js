@@ -25,7 +25,7 @@
  */
 
 const swatchTime = require('./SwatchTimer.js');
-const time = '36fa5d00';
+const time = '005dfa82';
 
 var timer = new swatchTime();
 
@@ -34,7 +34,7 @@ buffer = new Buffer(time, "hex");
 
 //2. Create Uin8Array + reverting it
 var u8Arr = new Uint8Array(buffer);
-//u8Arr = u8Arr.reverse();
+u8Arr = u8Arr.reverse();
 
 //3. Create Float array
 var u32Arr = new Uint32Array(u8Arr.buffer);
