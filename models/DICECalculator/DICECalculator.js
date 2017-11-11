@@ -84,6 +84,11 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
     var peiesOfChunks = countOfValiZeros % cBtitsInHex;
     var validHexValue = cArrayValidHex[peiesOfChunks];
 
+    //Reverse Hash of Prototype 
+    var buffer = new Buffer(SHA_DICEPrototype, "hex");
+    SHA_DICEPrototype = Buffer.from(new Uint8Array(buffer).reverse()).toString('hex');
+
+
     var hexChar = SHA_DICEPrototype.charAt(chunks);
     if (validHexValue >= hexChar) {
         isInvalid = false;
@@ -151,9 +156,6 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros) {
         //Create SHA3-512 to whole Prototype
         SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array());
 
-        //Reverse Hash of Prototype
-        SHA_DICEPrototype = SHA_DICEPrototype.split('').reverse().join('');
-
         //Validate
         isInValidDICE = _CheckValidZeroes(SHA_DICEPrototype, DICEPrototypeL.validZeros[0]);
         if (true !== isInValidDICE) {
@@ -178,9 +180,6 @@ function _GetSHA3OfValidUnit(DICEUnit) {
 
     //Create SHA of whole DICE Unit
     SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array());
-
-    //Reverse Hash of Prototype
-    SHA_DICEPrototype = SHA_DICEPrototype.split('').reverse().join('');
 
     return SHA_DICEPrototype;
 }

@@ -49,7 +49,7 @@ _Method.setMinerAddress = function (string, base58) {
     if ('bs58' !== base58) {
         this.addrMiner = _stringToUint8Array(string, this.addrMiner.length);
     } else {
-        this.addrMiner = _bs58AddrToRaw(string).reverse();
+        this.addrMiner = _bs58AddrToRaw(string);
     }
 };
 
@@ -57,7 +57,7 @@ _Method.setOperatorAdress = function (string, base58) {
     if ('bs58' !== base58) {
         this.addrOperator = _stringToUint8Array(string, this.addrOperator.length);
     } else {
-        this.addrOperator = _bs58AddrToRaw(string).reverse();
+        this.addrOperator = _bs58AddrToRaw(string);
         console.log();
     }
 };
@@ -71,10 +71,10 @@ _Method.setValidZeros = function (byte) {
 };
 
 _Method.setSwatchTime = function (float) {
-    var buf_F32 = new Float32Array(1);
+    var buf_U32 = new Uint32Array(1);
     if (null !== float.length) {
-        buf_F32[0] = float;
-        this.swatchTime = new Uint8Array(buf_F32.buffer).reverse();
+        buf_U32[0] = float;
+        this.swatchTime = new Uint8Array(buf_U32.buffer);
     } else {
         throw "Error Invalid Swatch Time!";
     }
@@ -83,7 +83,7 @@ _Method.setSwatchTime = function (float) {
 _Method.setPayload = function (Uint8Array_83) {
     if (null !== Uint8Array_83 &
             this.payLoad.length >= Uint8Array_83.length) {
-        this.payLoad = Uint8Array_83.reverse();
+        this.payLoad = Uint8Array_83;
     } else {
         throw "Error Invalid PayloadArray!";
     }

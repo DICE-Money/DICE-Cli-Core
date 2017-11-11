@@ -44,7 +44,8 @@ _Method.fromDICEUnit = function(diceUnit) {
 
 _Method.setSHA3PayLoad = function(SHA3PayLoad) {
   if (null !== SHA3PayLoad) {
-    this.SHA3PayLoad = _stringToUint8ArrayReversed(SHA3PayLoad);
+    var buffer = new Buffer(SHA3PayLoad, "hex");
+    this.SHA3PayLoad =  new Uint8Array(buffer);
   } else {
     throw "Error Invalid SHAPayloadArray!";
   }
