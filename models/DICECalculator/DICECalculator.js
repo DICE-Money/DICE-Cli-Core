@@ -35,7 +35,6 @@ const modDICEHeader = require('./DICEHeader.js');
 //Const parameters
 const cMaxValidZeros = 256;
 const cBitsPerByte = 8;
-const cArrayValidHex = ["f", "7", "3", "1"];
 const cBtitsInHex = 4;
 
 //Local variables
@@ -82,24 +81,16 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
     var isInvalid = true;
     var chunks = Math.floor(countOfValiZeros / cBtitsInHex);
     var peiesOfChunks = countOfValiZeros % cBtitsInHex;
-    var validHexValue = cArrayValidHex[peiesOfChunks];
+    var validHexValue = _getTableForRightAlign(peiesOfChunks);
 
-    //Reverse Hash of Prototype 
-    SHA_DICEPrototype = SHA_DICEPrototype.split('').reverse().join('');
-
-
-    var hexChar = SHA_DICEPrototype.charAt(chunks);
-    if (validHexValue >= hexChar) {
-        isInvalid = false;
-    } else {
-        isInvalid = true;
-    }
+    var hexChar = SHA_DICEPrototype.charAt(SHA_DICEPrototype.length - chunks - 1);
+    isInvalid = !(validHexValue.includes(hexChar));
 
     //If the last item is valid, 
     //check the previos are they 
     //all equal to zero
     if (false === isInvalid) {
-        for (var i = 0; i < chunks; i++) {
+        for (var i = SHA_DICEPrototype.length - 1; i >= SHA_DICEPrototype.length - chunks; i--) {
             hexChar = SHA_DICEPrototype.charAt(i);
             if ("0" !== hexChar) {
                 isInvalid = true;
@@ -110,24 +101,6 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
         //Nothing To Do 
     }
     return isInvalid;
-}
-
-function _convertNumber(n, fromBase, toBase) {
-    if (fromBase === void 0) {
-        fromBase = 10;
-    }
-    if (toBase === void 0) {
-        toBase = 10;
-    }
-    return parseInt(n.toString(), fromBase).toString(toBase);
-}
-
-function _copyArrayFromString(to, from) {
-    var bufArray = new Uint8Array(to.lenght);
-    for (var i = 0; i < bufArray.lenght; i++) {
-        bufArray[i] = from.charCodeAt(i);
-    }
-    return bufArray;
 }
 
 function _CalculateDICEUnit(addrOp, addrMin, validZeros) {
@@ -183,6 +156,29 @@ function _GetSHA3OfValidUnit(DICEUnit) {
     return SHA_DICEPrototype;
 }
 
+function _getTableForRightAlign(countOfZeroes) {
+    var rightTable;
+    switch (countOfZeroes) {
+        case 1:
+            rightTable = ['e', 'c', 'a', '8', '6', '4', '2', '0'];
+            break;
+        case 2:
+            rightTable = ['c', '4', '0'];
+            break;
+        case 3:
+            rightTable = ['8', '0'];
+            break;
+        case 0:
+        case 4:
+            rightTable = ['0'];
+            break;
+        default:
+            throw "Invalid Count of zeroes! must be from 1 to 4"
+            break;
+    }
+
+    return rightTable;
+}
 //Public
 _Method.Alive = function () {
     console.log("Hello Node.js - DICE Unit Calculator");
@@ -195,6 +191,10 @@ _Method.getValidDICE = function (addrOp, addrMin, validZeros) {
 
 _Method.getSHA3OfUnit = function (DICEUnit) {
     return _GetSHA3OfValidUnit(DICEUnit);
+};
+
+_Method.getHexLookingTable = function (countOfZeroes) {
+    return _getTableForRightAlign(countOfZeroes);
 };
 
 // export the class
