@@ -26,87 +26,125 @@
 
 //Required
 const modDICECalculator = require('../DICECalculator/DICECalculator.js');
+const modDICEPrototype = require('../DICECalculator/DICEPrototype.js');
 
 //Class access 
 var _Method = DICEValue.prototype;
 
+//Local const
 const cBtitsInHex = 4;
 const cNmargin = 10;
+const cMaxValueOfDICE = 1024;
 
 function DICEValue() {
-    this.unitValue = 1;
-    this.unitMax = 1;
-    this.DICEUnit = undefined;
+  this.unitValue = 1;
+  this.unitMax = 1;
+  this.DICEProto = undefined;
 }
 
-_Method.calculateValue = function (k, z, N) {
-    var Nmax = N + cNmargin;
-    var b = _getTralingZeroesInDICE(this.DICEUnit);
-    
-    //Save values
-    this.unitValue = (k * ((Math.pow(2, (b - z))) / (Math.pow(2, (N - z)))));
-    this.unitMax = Math.pow(2, Nmax);
+_Method.calculateValue = function(k, z, N) {
+  var Nmax = N + cNmargin;
+  var b = _getTralingZeroesInDICEProto(this.DICEProto);
+  var value = (k * ((Math.pow(2, (b - z))) / (Math.pow(2, (N - z)))));
+
+  //Check boundry
+  if (cMaxValueOfDICE <= value) {
+    value = cMaxValueOfDICE;
+  } else if ((1 / cMaxValueOfDICE) >= value) {
+    value = (1 / cMaxValueOfDICE);
+  }
+
+  //Save values
+  this.unitValue = value;
+  this.unitMax = Math.pow(2, Nmax);
 };
 
-_Method.getDICEUnit = function () {
-    return this.DICEUnit;
+_Method.getDICEProto = function() {
+  return this.DICEProto;
 };
 
-_Method.setDICEUnit = function (DICEUnit) {
-    if (null !== DICEUnit) {
-        this.DICEUnit = DICEUnit;
-    } else {
-        throw "Error it cannot be Undefined!";
-    }
-};
-
-_Method.getZeroes = function () {
-    return _getTralingZeroesInDICE(this.DICEUnit);
-};
-//Private
-function _getTralingZeroesInDICE(DICEUnit) {
-    var b = DICEUnit.validZeros;
+_Method.setDICEProtoFromUnit = function(DICEUnit) {
+  if (null !== DICEUnit) {
     var DICECalc = new modDICECalculator();
-    var sha3OfDICE = DICECalc.getSHA3OfUnit(DICEUnit);
-    var cArrayValidHex =
-            [
-                DICECalc.getHexLookingTable(1),
-                DICECalc.getHexLookingTable(2),
-                DICECalc.getHexLookingTable(3)
-            ];
+    var DICEPrototypeL = new modDICEPrototype();
+    
+    //Prepare Prototype
+    DICEPrototypeL.fromDICEUnit(DICEUnit);
+    SHA_PayLoad = DICECalc.CalculateSHA3_512(DICEUnit.payLoad);
+    DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
+    
+    this.DICEProto = DICEPrototypeL;
+  } else {
+    throw "Error it cannot be Undefined!";
+  }
+};
 
-    var countOfZeros = 0;
-    var lastPosition = sha3OfDICE.length - 1;
+_Method.setDICEProto = function(DICEProto) {
+  if (null !== DICEProto) {
+    this.DICEProto = DICEProto;
+  } else {
+    throw "Error it cannot be Undefined!";
+  }
+};
 
-    //Walkthouhgt the whole hex string
-    for (var i = sha3OfDICE.length - 1; i >= 0; i--) {
-        if ("0" === sha3OfDICE.charAt(i)) {
-            countOfZeros++;
-        } else {
-            break;
-        }
+_Method.getZeroes = function() {
+  return _getTralingZeroesInDICEProto(this.DICEProto);
+};
+
+//Private
+function _getTralingZeroesInDICEProto(DICEProto) {
+  var DICECalc = new modDICECalculator();
+  var sha3OfDICE = DICECalc._GetSHA3OfValidPrototype(DICEProto);
+  var cArrayValidHex = [
+    DICECalc.getHexLookingTable(1),
+    DICECalc.getHexLookingTable(2),
+    DICECalc.getHexLookingTable(3)
+  ];
+
+  return _getTralingZeroes(sha3OfDICE, cArrayValidHex);
+}
+
+function _getTralingZeroes(sha3OfDICE, arrayOfValid) {
+  var b = 1; //at least one zero
+  var countOfZeros = 0;
+  var lastPosition = sha3OfDICE.length - 1;
+
+  //Walkthouhgt the whole hex string
+  for (var i = sha3OfDICE.length - 1; i >= 0; i--) {
+    if ("0" === sha3OfDICE.charAt(i)) {
+      countOfZeros++;
+    } else {
+      break;
     }
+  }
 
-    //Update last postion
-    lastPosition -= countOfZeros;
-
-    //One "0" has 4 real zeroes
-    countOfZeros *= cBtitsInHex;
-
-    //Get char at last position
-    sha3OfDICE = sha3OfDICE.charAt(lastPosition);
-
-    //Validate char at last position
-    for (var i = (cArrayValidHex.length - 1); i >= 0; i--) {
-        if (false !== cArrayValidHex[i].includes(sha3OfDICE)) {
-            countOfZeros += (i + 1);
-            break;
-        }
+  //Update last postion
+  lastPosition -= countOfZeros;
+  //One "0" has 4 real zeroes
+  countOfZeros *= cBtitsInHex;
+  //Get char at last position
+  sha3OfDICE = sha3OfDICE.charAt(lastPosition);
+  //Validate char at last position
+  for (var i = (arrayOfValid.length - 1); i >= 0; i--) {
+    if (false !== arrayOfValid[i].includes(sha3OfDICE)) {
+      countOfZeros += (i + 1);
+      break;
     }
+  }
 
-    b = countOfZeros;
+  b = countOfZeros;
+  return b;
+}
 
-    return b;
+function _getTralingZeroesInDICEProto(DICEProto) {
+  var DICECalc = new modDICECalculator();
+  var sha3OfDICEProto = DICECalc.getSHA3OfProtoType(DICEProto);
+  var cArrayValidHex = [
+    DICECalc.getHexLookingTable(1),
+    DICECalc.getHexLookingTable(2),
+    DICECalc.getHexLookingTable(3)
+  ];
+  return _getTralingZeroes(sha3OfDICEProto, cArrayValidHex);
 }
 
 module.exports = DICEValue;

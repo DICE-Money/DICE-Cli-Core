@@ -34,13 +34,13 @@ var DICE = new modDICEUnit();
 var DICECalc = new modDICECalculator();
 
 //2. Read data for Valid DICE Unit from file
-file = modFs.readFileSync('../../diceUnit13.json', "utf8");
+file = modFs.readFileSync('../../diceUnit.json', "utf8");
 DICE = DICE.from(file);
 
 //3. Create a new instance of the Value 
 //and save the current DICE to It
 var value = new modDICEValue();
-value.setDICEUnit(DICE);
+value.setDICEProtoFromUnit(DICE);
 
 //4. Print How Many zeroes have been founded in HEX 
 console.log(value.getZeroes());
