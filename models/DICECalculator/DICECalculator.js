@@ -121,32 +121,20 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros) {
     DICEPrototypeL.fromDICEUnit(DICEUnit);
     
     while (isInValidDICE) {
-
-//        console.time('Iteration');
         //Get the changeable data - Time and Payload
         DICEUnit.setSwatchTime(SwatchTimerL.getBeats());
         _CalculatePayload(DICEUnit);
-//        console.timeEnd('Payload_Time');
-
-//        console.time('Copy_In_DicePRoto');
+        
         //Create Prototype from Unit and hashing of Payload
         DICEPrototypeL.setSwatchTime(DICEUnit.swatchTime);
         SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad);
-//        console.timeEnd('Copy_In_DicePRoto');
-
-//        console.time('SHA_Payload');
         DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
-//        console.timeEnd('SHA_Payload');
 
-//        console.time('SHA of Proto');
         //Create SHA3-512 to whole Prototype
         SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array());
-//        console.timeEnd('SHA of Proto');
 
-//        console.time('Validating');
         //Validate
         isInValidDICE = _CheckValidZeroes(SHA_DICEPrototype, DICEPrototypeL.validZeros[0]);
-//        console.timeEnd('Iteration');
 
         if (true !== isInValidDICE) {
             _SendValidPrototype(DICEPrototypeL);
