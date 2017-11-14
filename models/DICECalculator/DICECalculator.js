@@ -114,25 +114,40 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros) {
     var SHA_DICEPrototype = "";
     var SHA_PayLoad = "";
 
-    //Real Calculation Algorithm
+    //Prepare Header
     _PrepareHeader(addrOp, addrMin, validZeros, DICEUnit);
-
+    
+    //Init DICEProto with Header
+    DICEPrototypeL.fromDICEUnit(DICEUnit);
+    
     while (isInValidDICE) {
 
+//        console.time('Iteration');
         //Get the changeable data - Time and Payload
         DICEUnit.setSwatchTime(SwatchTimerL.getBeats());
         _CalculatePayload(DICEUnit);
+//        console.timeEnd('Payload_Time');
 
+//        console.time('Copy_In_DicePRoto');
         //Create Prototype from Unit and hashing of Payload
-        DICEPrototypeL.fromDICEUnit(DICEUnit);
+        DICEPrototypeL.setSwatchTime(DICEUnit.swatchTime);
         SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad);
-        DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
+//        console.timeEnd('Copy_In_DicePRoto');
 
+//        console.time('SHA_Payload');
+        DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
+//        console.timeEnd('SHA_Payload');
+
+//        console.time('SHA of Proto');
         //Create SHA3-512 to whole Prototype
         SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array());
+//        console.timeEnd('SHA of Proto');
 
+//        console.time('Validating');
         //Validate
         isInValidDICE = _CheckValidZeroes(SHA_DICEPrototype, DICEPrototypeL.validZeros[0]);
+//        console.timeEnd('Iteration');
+
         if (true !== isInValidDICE) {
             _SendValidPrototype(DICEPrototypeL);
         }
@@ -177,7 +192,7 @@ function _getTableForRightAlign(countOfZeroes) {
             break;
         case 0:
         case 4:
-            rightTable = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+            rightTable = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
             break;
         default:
             throw "Invalid Count of zeroes! must be from 1 to 4";

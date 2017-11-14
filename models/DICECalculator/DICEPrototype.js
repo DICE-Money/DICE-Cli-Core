@@ -27,30 +27,37 @@
 var _Method = DICEPrototype.prototype;
 
 function DICEPrototype() {
-  //1024bit or 128 byte Dice raw prototype
-  this.addrOperator = new Uint8Array(20);
-  this.addrMiner = new Uint8Array(20);
-  this.validZeros = new Uint8Array(1);
-  this.swatchTime = new Uint8Array(4);
-  this.SHA3PayLoad = new Uint8Array(64);
+    //1024bit or 128 byte Dice raw prototype
+    this.addrOperator = new Uint8Array(20);
+    this.addrMiner = new Uint8Array(20);
+    this.validZeros = new Uint8Array(1);
+    this.swatchTime = new Uint8Array(4);
+    this.SHA3PayLoad = new Uint8Array(64);
 }
 
-_Method.fromDICEUnit = function(diceUnit) {
-  this.addrOperator = diceUnit.addrOperator;
-  this.addrMiner = diceUnit.addrMiner;
-  this.validZeros = diceUnit.validZeros;
-  this.swatchTime = diceUnit.swatchTime;
+_Method.fromDICEUnit = function (diceUnit) {
+    this.addrOperator = diceUnit.addrOperator;
+    this.addrMiner = diceUnit.addrMiner;
+    this.validZeros = diceUnit.validZeros;
+    this.swatchTime = diceUnit.swatchTime;
 };
 
-_Method.setSHA3PayLoad = function(SHA3PayLoad) {
-  if (null !== SHA3PayLoad) {
-    var buffer = new Buffer(SHA3PayLoad, "hex");
-    this.SHA3PayLoad =  new Uint8Array(buffer);
-  } else {
-    throw "Error Invalid SHAPayloadArray!";
-  }
+_Method.setSHA3PayLoad = function (SHA3PayLoad) {
+    if (null !== SHA3PayLoad) {
+        var buffer = new Buffer(SHA3PayLoad, "hex");
+        this.SHA3PayLoad = new Uint8Array(buffer);
+    } else {
+        throw "Error Invalid SHAPayloadArray!";
+    }
 };
 
+_Method.setSwatchTime = function (SwatchTime) {
+    if (null !== SwatchTime) {
+        this.swatchTime = SwatchTime;
+    } else {
+        throw "Error Invalid SwatchTime!";
+    }
+};
 /**
  * Creates a new Uint8Array based on all data in Current Prototype
  *
@@ -58,21 +65,21 @@ _Method.setSHA3PayLoad = function(SHA3PayLoad) {
  * @param None
  * @return {Uint8Array} All data concatenated.
  */
-_Method.toUint8Array = function() {
-  var bufArray = new Uint8Array(
-    this.addrOperator.byteLength +
-    this.addrMiner.byteLength +
-    this.validZeros.byteLength +
-    this.swatchTime.byteLength +
-    this.SHA3PayLoad.byteLength);
+_Method.toUint8Array = function () {
+    var bufArray = new Uint8Array(
+            this.addrOperator.byteLength +
+            this.addrMiner.byteLength +
+            this.validZeros.byteLength +
+            this.swatchTime.byteLength +
+            this.SHA3PayLoad.byteLength);
 
-  bufArray.set(new Uint8Array(this.addrOperator.buffer), 0);
-  bufArray.set(new Uint8Array(this.addrMiner.buffer), this.addrOperator.byteLength);
-  bufArray.set(new Uint8Array(this.validZeros.buffer), this.addrMiner.byteLength);
-  bufArray.set(new Uint8Array(this.swatchTime.buffer), this.validZeros.byteLength);
-  bufArray.set(new Uint8Array(this.SHA3PayLoad.buffer), this.swatchTime.byteLength);
-  
-  return bufArray;
+    bufArray.set(new Uint8Array(this.addrOperator.buffer), 0);
+    bufArray.set(new Uint8Array(this.addrMiner.buffer), this.addrOperator.byteLength);
+    bufArray.set(new Uint8Array(this.validZeros.buffer), this.addrMiner.byteLength);
+    bufArray.set(new Uint8Array(this.swatchTime.buffer), this.validZeros.byteLength);
+    bufArray.set(new Uint8Array(this.SHA3PayLoad.buffer), this.swatchTime.byteLength);
+
+    return bufArray;
 };
 
 //Local private functions   
