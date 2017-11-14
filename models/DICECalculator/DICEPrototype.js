@@ -76,32 +76,5 @@ _Method.toUint8Array = function() {
 };
 
 //Local private functions   
-function _stringToUint8Array(string, sizeOfArray) {
-  var stringCounter = 0;
-  var bufArray = new Uint8Array(sizeOfArray);
-  for (var i = (bufArray.length - 1); i >= 0; i--) {
-    bufArray[i] = string.charCodeAt(stringCounter);
-    stringCounter++;
-  }
-  return bufArray;
-};
-
-function _stringToUint8ArrayReversed(stringInHex) {
-  var bufArray = _hexStringToByte(stringInHex);
-  return bufArray.reverse();
-};
-
-function _hexStringToByte(str) {
-  if (!str) {
-    return new Uint8Array();
-  }
-  
-  var a = [];
-  for (var i = 0, len = str.length; i < len; i+=2) {
-    a.push(parseInt(str.substr(i,2),16));
-  }
-  
-  return new Uint8Array(a);
-}
 
 module.exports = DICEPrototype;

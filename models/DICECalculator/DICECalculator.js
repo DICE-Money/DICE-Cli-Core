@@ -60,7 +60,9 @@ function _CalculatePayload(DICEUnit) {
  */
 function _CalculateSHA3_512(buffer) {
     return modSHA3_512(buffer);
+
 }
+;
 
 function _ValidatePrototype(prototype) {
     var isValidPrototype = false;
@@ -100,6 +102,7 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
     } else {
         //Nothing To Do 
     }
+
     return isInvalid;
 }
 
@@ -140,7 +143,6 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros) {
 
 function _GetSHA3OfValidUnit(DICEUnit) {
     var DICEPrototypeL = new modDICEPrototype();
-    var SHA_DICEPrototype = "";
     var SHA_PayLoad = "";
 
     //Prepare Prototype
@@ -150,8 +152,13 @@ function _GetSHA3OfValidUnit(DICEUnit) {
     SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad);
     DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
 
+    return _GetSHA3OfValidPrototype(DICEPrototypeL);
+}
+
+function _GetSHA3OfValidPrototype(DICEProto) {
+
     //Create SHA of whole DICE Unit
-    SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array());
+    SHA_DICEPrototype = _CalculateSHA3_512(DICEProto.toUint8Array());
 
     return SHA_DICEPrototype;
 }
@@ -170,15 +177,16 @@ function _getTableForRightAlign(countOfZeroes) {
             break;
         case 0:
         case 4:
-            rightTable = ['0'];
+            rightTable = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
             break;
         default:
-            throw "Invalid Count of zeroes! must be from 1 to 4"
+            throw "Invalid Count of zeroes! must be from 1 to 4";
             break;
     }
 
     return rightTable;
 }
+
 //Public
 _Method.Alive = function () {
     console.log("Hello Node.js - DICE Unit Calculator");
@@ -193,8 +201,16 @@ _Method.getSHA3OfUnit = function (DICEUnit) {
     return _GetSHA3OfValidUnit(DICEUnit);
 };
 
+_Method.getSHA3OfProtoType = function (DICEProto) {
+    return _GetSHA3OfValidPrototype(DICEProto);
+};
+
 _Method.getHexLookingTable = function (countOfZeroes) {
     return _getTableForRightAlign(countOfZeroes);
+};
+
+_Method.CalculateSHA3_512 = function (buffer) {
+    return _CalculateSHA3_512(buffer);
 };
 
 // export the class
