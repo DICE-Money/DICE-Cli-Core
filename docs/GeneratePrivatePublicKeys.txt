@@ -1,0 +1,24 @@
+
+Web Generated:
+
+Operator
+18yEQthHFiSpxCH7T2rkmHHAAykxuKzbmg -Addr
+L5csQFgztmnG4e8bN7ca852KXxrWzwepC67zR6z6qRdjruL74Efm - Key
+
+Miner
+1N4EaE2sk6MhrpwNi8r3K3eGn5jEHVipKt -Addr
+L18hW17MaW8ENTZqcUSw9jkXwoDqd4bXVCsPNbFXNL1TEHTCe7Z2 - Key
+
+
+//Generate new DiceUnit
+TestDICECalculator.exe -c .\diceUnit.json 18yEQthHFiSpxCH7T2rkmHHAAykxuKzbmg 1N4EaE2sk6MhrpwNi8r3K3eGn5jEHVipKt 12
+
+//Validate Unit
+TestDICECalculator.exe -h .\diceUnit.json 
+
+//Generate Address + Key to JSON
+node index.js -g .\diceUnit.json 
+
+//Get value of diceUnit
+//z = 20 , N = 44
+node index.js -v .\diceUnit.json 20 44
