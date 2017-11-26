@@ -35,6 +35,7 @@ var _Method = DICEValue.prototype;
 const cBtitsInHex = 4;
 const cNmargin = 10;
 const cMaxValueOfDICE = 1024;
+const cMinValueOfDICE = 1/1024;
 
 function DICEValue() {
   this.unitValue = 1;
@@ -42,16 +43,22 @@ function DICEValue() {
   this.DICEProto = undefined;
 }
 
-_Method.calculateValue = function(k, z, N) {
+_Method.calculateValue = function(k, N) {
   var Nmax = N + cNmargin;
   var b = _getTralingZeroesInDICEProto(this.DICEProto);
-  var value = (k * ((Math.pow(2, (b - z))) / (Math.pow(2, (N - z)))));
+  var z = this.DICEProto.validZeros[0];
+  
+  var value = (k * (
+                    (Math.pow(2, (b - z))) / 
+                    (Math.pow(2, (N - z)))
+                    )
+              );
 
   //Check boundry
-  if (cMaxValueOfDICE <= value) {
+  if (cMaxValueOfDICE < value) {
     value = cMaxValueOfDICE;
-  } else if ((1 / cMaxValueOfDICE) >= value) {
-    value = (1 / cMaxValueOfDICE);
+  } else if (cMinValueOfDICE > value) {
+    value = "IvalidDICE";
   }
 
   //Save values

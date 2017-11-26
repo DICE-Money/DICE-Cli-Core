@@ -49,5 +49,5 @@ console.log(value.getZeroes());
 console.log(DICECalc.getSHA3OfUnit(DICE));
 
 //6. Print Value of the DICE Unit
-value.calculateValue(1, 20, 44);
+value.calculateValue(1, 31);
 console.log(value.unitValue);
