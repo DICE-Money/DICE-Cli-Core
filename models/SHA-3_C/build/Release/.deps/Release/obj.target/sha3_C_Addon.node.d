@@ -1,0 +1,1 @@
+cmd_Release/obj.target/sha3_C_Addon.node := g++ -shared -pthread -rdynamic  -Wl,-soname=sha3_C_Addon.node -o Release/obj.target/sha3_C_Addon.node -Wl,--start-group Release/obj.target/sha3_C_Addon/sha3JS.o -Wl,--end-group 
