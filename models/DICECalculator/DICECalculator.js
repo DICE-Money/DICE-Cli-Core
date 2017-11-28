@@ -26,7 +26,7 @@
 
 //Required 3rd-party libraries
 const modCrypto = require('crypto');
-const modSHA3_512 = require('js-sha3').sha3_512;
+const modSHA3 = require('../SHA-3_C/build/Release/sha3_C_Addon');
 const modSwatchTimer = require('../SwatchBeats/SwatchTimer.js');
 const modDICEUnit = require('./DICEUnit.js');
 const modDICEPrototype = require('./DICEPrototype.js');
@@ -59,10 +59,9 @@ function _CalculatePayload(DICEUnit) {
  * @return {String} in hex.
  */
 function _CalculateSHA3_512(buffer) {
-    return modSHA3_512(buffer);
+    return modSHA3.sha3_512(buffer);
 
 }
-;
 
 function _ValidatePrototype(prototype) {
     var isValidPrototype = false;
