@@ -38,8 +38,8 @@ const cECDH = modCrypto.createECDH(cCurveECDH);
 // Constructor
 function DigitalAdressCalculator() {
     // always initialize all instance properties
-    this._privateKey = "NOK";
-    this._digitalAdress = "NOK";
+    this.privateKey = "NOK";
+    this.digitalAdress = "NOK";
 }
 
 //Local functions
@@ -78,18 +78,18 @@ _Method.CalculateKeyAdressPair = function () {
     cECDH.generateKeys();
 
     //GenerateRaw
-    this._privateKey = _CalculatePrivateKey();
-    this._digitalAdress = _CalculateDigitalAdress();
+    this.privateKey = _CalculatePrivateKey();
+    this.digitalAdress = _CalculateDigitalAdress();
 };
 
 //Export Get methods
 _Method.getPrivateKey = function (format) {
-    var privateKey = new Buffer.from(this._privateKey, 'hex');
+    var privateKey = new Buffer.from(this.privateKey, 'hex');
 
     if (format === 'bs58') {
         privateKey = modBase58.encode(privateKey);
     } else if (format === 'hex') {
-        privateKey = this._privateKey;
+        privateKey = this.privateKey;
     } else {
         //Nothing
     }
@@ -98,12 +98,12 @@ _Method.getPrivateKey = function (format) {
 };
 
 _Method.getDigitalAdress = function (format) {
-    var digitalAddr = Buffer.from(this._digitalAdress, 'hex');
+    var digitalAddr = Buffer.from(this.digitalAdress, 'hex');
 
     if (format === 'bs58') {
         digitalAddr = modBase58.encode(digitalAddr);
     } else if (format === 'hex') {
-        digitalAddr = this._digitalAdress;
+        digitalAddr = this.digitalAdress;
     } else {
         //Nothing
     }
@@ -111,6 +111,9 @@ _Method.getDigitalAdress = function (format) {
     return digitalAddr;
 };
 
+_Method.getCurveType = function(){
+  return cCurveECDH;
+};
 
 // export the class
 module.exports = DigitalAdressCalculator;
