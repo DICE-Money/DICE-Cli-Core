@@ -36,6 +36,7 @@ const cBtitsInHex = 4;
 const cNmargin = 10;
 const cMaxValueOfDICE = 1024;
 const cMinValueOfDICE = 1/1024;
+const cInvalidDICE = "IvalidDICE";
 
 function DICEValue() {
   this.unitValue = 1;
@@ -58,7 +59,7 @@ _Method.calculateValue = function(k, N) {
   if (cMaxValueOfDICE < value) {
     value = cMaxValueOfDICE;
   } else if (cMinValueOfDICE > value) {
-    value = "IvalidDICE";
+    value = cInvalidDICE;
   }
 
   //Save values
