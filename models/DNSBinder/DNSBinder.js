@@ -42,18 +42,18 @@ function DNSBinder() {
 //Private Methods
 function _checkForNull(data) {
     if (data === null) {
-        throw "Cannot be Null !";
+        throw "Cannot be Null!";
     }
     return data;
 }
 
 //Public Methods
 _Method.lookup = function (addrOp) {
-    return this.fileDB[addrOp];
+    return this.fileDB[_checkForNull(addrOp)];
 };
 
 _Method.remove = function (addrOp) {
-    delete this.fileDB[addrOp];
+    delete this.fileDB[_checkForNull(addrOp)];
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };
 
