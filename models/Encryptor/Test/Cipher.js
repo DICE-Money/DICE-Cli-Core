@@ -54,17 +54,35 @@ const traceySecret = tracey.computeSecret(aliceKey);
 //console.log(aliceSecret.length);
 //console.log(aliceSecret.toString('hex'),"\n" + bobSecret.toString('hex'),"\n" + traceySecret.toString('hex'));
 // OK
+for (var i = 0; crypto.getCurves().length; i++) {
+  try{
+  const mihail = crypto.createECDH(crypto.getCurves()[i]);
+  //mihail.setPrivateKey('L5QnNSWiad3T96sVrpAraCQNRnS4sJsHF5Vn6F2DDKBm5BPLrays');
+  //const mihailKey = mihail.getPublicKey(null,'compressed');
+  mihail.generateKeys();
+  mihailKey = mihail.getPublicKey(null, 'compressed');
 
-const mihail = crypto.createECDH('secp521r1');
-mihail.setPrivateKey('L5QnNSWiad3T96sVrpAraCQNRnS4sJsHF5Vn6F2DDKBm5BPLrays');
-const mihailKey = mihail.getPublicKey(null,'compressed');
+  if(mihailKey.length <= 20) console.log(crypto.getCurves()[i], mihailKey.length);
+  }catch(e){}
+  }
+const input = 'mihailKey';
 
-const input = mihailKey;
+/*const mihail2 = crypto.createECDH("secp128r1");
+//mihail.setPrivateKey('L5QnNSWiad3T96sVrpAraCQNRnS4sJsHF5Vn6F2DDKBm5BPLrays');
+//const mihailKey = mihail.getPublicKey(null,'compressed');
+mihail2.generateKeys();
+mihailKey2 = mihail2.getPublicKey(null, 'compressed');
 
+console.log(mihail.computeSecret(mihailKey2));
+console.log(mihail2.computeSecret(mihailKey));
 
-zlib.deflate(input,{ windowBits: 14, memLevel: 9 }, (err, buffer) => {
+//console.log(crypto.getCurves());
+zlib.deflate(input, {
+  windowBits: 14,
+  memLevel: 9
+}, (err, buffer) => {
   if (!err) {
-    console.log(buffer.length);
+    console.log(buffer.toString("base64"));
   } else {
     // handle error
   }
@@ -102,12 +120,12 @@ console.log(mihailKey.length);
 console.log(mihailKey.toString("base64"));
 
 function _SHA256(text) {
-    var hash = crypto.
-            createHash('sha256').
-            update(text).
-            digest();
+  var hash = crypto.
+  createHash('sha256').
+  update(text).
+  digest();
 
-    return hash;
+  return hash;
 }
 
 
@@ -116,26 +134,28 @@ const ENCRYPTION_KEY = _SHA256(mihailKey); // Must be 256 bytes (32 characters)
 const IV_LENGTH = 16; // For AES, this is always 16
 
 function encrypt(text) {
- let iv = crypto.randomBytes(IV_LENGTH);
- let cipher = crypto.createCipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
- let encrypted = cipher.update(text);
+  let iv = crypto.randomBytes(IV_LENGTH);
+  let cipher = crypto.createCipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
+  let encrypted = cipher.update(text);
 
- encrypted = Buffer.concat([encrypted, cipher.final()]);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
 
- return iv.toString('hex') + ':' + encrypted.toString('hex');
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
 }
 
 function decrypt(text) {
- let textParts = text.split(':');
- let iv = new Buffer(textParts.shift(), 'hex');
- let encryptedText = new Buffer(textParts.join(':'), 'hex');
- let decipher = crypto.createDecipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
- let decrypted = decipher.update(encryptedText);
+  let textParts = text.split(':');
+  let iv = new Buffer(textParts.shift(), 'hex');
+  let encryptedText = new Buffer(textParts.join(':'), 'hex');
+  let decipher = crypto.createDecipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
+  let decrypted = decipher.update(encryptedText);
 
- decrypted = Buffer.concat([decrypted, decipher.final()]);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
 
- return decrypted.toString('base64');
+  return decrypted.toString('base64');
 }
+
 var en = encrypt(mihailKey);
-console.log(en);
-console.log(decrypt(en));
+//console.log(en.length);
+//console.log(decrypt(en));
+*/
