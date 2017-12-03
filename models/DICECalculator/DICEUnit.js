@@ -113,24 +113,6 @@ _Method.from = function (JSONFile) {
     return DICEUnitL;
 };
 
-//Under Development
-//_Method.toBase58 = function () {
-//    var base58String = "";
-//    var bytes = this.addrOperator;
-//
-//    //Without manupulations
-//    console.log(this.addrOperator.join(''));
-//
-//    //Encode
-//    base58String = modBase58.encode(bytes);
-//    console.log(base58String);
-//
-//    //Decode
-//    bytes = modBase58.decode(base58String);
-//    console.log(bytes.reverse().toString());
-//
-//    return base58String;
-//};
 
 _Method.toHexStringifyUnit = function () {
     var bufferDICE = new DICEUnit();
@@ -159,7 +141,6 @@ function _stringToUint8Array(string, sizeOfArray) {
 function _bs58AddrToRaw(string) {
     var bytes = modBase58.decode(string);
     var u8Array = new Uint8Array(bytes);
-    u8Array = u8Array.slice(cBitCoinAdressVersion, (u8Array.length - cBitCoinAdressCheckSum));
     return u8Array;
 }
 
