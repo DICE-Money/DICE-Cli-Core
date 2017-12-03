@@ -31,24 +31,6 @@ const modNet = require('net');
 var _Method = TcpWorker.prototype;
 
 //Local const
-const cCommands =
-        {"GET Time":
-                    {
-                        desc: 'Return current time on server',
-                        exec: () =>
-                        {
-                            return new Date().toString();
-                        }
-                    },
-            "SET Data":
-                    {
-                        desc: 'Set data to server by Address',
-                        exec: (data) =>
-                        {
-                            return sliceDataByAddr(data);
-                        }
-                    }
-        };
 
 const cSchedulerWorkMs = 10;
 const cEndOfBuffer = '#';
@@ -60,6 +42,7 @@ function TcpWorker() {
     this.worker = undefined;
     this.type = undefined;
     this.sharedBuffer = {'client': undefined, 'server': undefined};
+    this.commands = {};
 }
 
 //Private
@@ -98,28 +81,42 @@ function sliceDataByAddr(data) {
     return data;
 }
 
-function dataCallbacks(tcpWorker, type, buffer) {
+function dataCallbacks(tcpWorker, type, buffer, commands) {
     if (type === 'client') {
         tcpWorker.on('data', function (data) {
-            buffer[type] = data.toString();
+            try {
+                buffer[type] = JSON.parse(data.toString());
+            } catch (e) {
+                //Nothing
+            }
         });
-
     } else {
         tcpWorker.on('connection', (c) => {
             c.on('data', (data) => {
+                buffer[type] = sliceDataByAddr(data);
+                var buf = {};
                 try {
-                    var returnData = cCommands[data.toString()].exec();
-                    c.write(returnData);
+                    for (var member in buffer[type]) {
+                        command = buffer[type][member].command;
+                        data = buffer[type][member].data;
+                        var returnData = commands[command].exec(data);
+                        buf[member] = {data: returnData};
+                    }
+                    c.write(JSON.stringify(buf));
                 } catch (e) {
-                    buffer[type] = (cCommands['SET Data'].exec(data));
+                    console.log(e);
                 }
+            });
+            
+            c.on('error', function () {
+                console.log('Client spontaneous disconnected.');
             });
         });
     }
 }
 
 //Public
-_Method.create = function (serverOrClient, ip, port) {
+_Method.create = function (serverOrClient, ip, port, commands) {
     if ("server" === serverOrClient) {
         this.type = 'server';
         this.worker = createServer(ip, port);
@@ -130,21 +127,17 @@ _Method.create = function (serverOrClient, ip, port) {
         throw "Invalid return request! Try \'server\' !";
     }
 
+    //Save commands
+    this.commands = commands;
+
     //set general callbacks
     generalCallbacks(this.worker);
 
     //data managment callbacks
-    dataCallbacks(this.worker, this.type, this.sharedBuffer);
-
+    dataCallbacks(this.worker, this.type, this.sharedBuffer, this.commands);
 };
 
-_Method.GET = function (command) {
-    if (this.type === 'client') {
-        this.worker.write(command);
-    }
-};
-
-_Method.SET = function (command, clientAddr, dataBuffer) {
+_Method.GET = function (command, clientAddr, dataBuffer) {
     if (this.type === 'client') {
         var data = {};
         data = ({addr: clientAddr, command: command, data: dataBuffer});
@@ -153,7 +146,7 @@ _Method.SET = function (command, clientAddr, dataBuffer) {
 };
 
 _Method.getCommands = function () {
-    return cCommands;
+    return this.commands;
 };
 
 _Method.readRaw = function () {
@@ -166,16 +159,22 @@ _Method.readRaw = function () {
 };
 
 _Method.readByAddress = function (clientAddress) {
-    if (this.type === 'server') {
-        var buffer;
-        try {
-            buffer = this.sharedBuffer[this.type][clientAddress].data;
-            this.sharedBuffer[this.type][clientAddress] = undefined;
-        } catch (e) {
-            //Nothing at the moment
-        }
+    var buffer;
+    try {
+        buffer = this.sharedBuffer[this.type][clientAddress].data;
+        this.sharedBuffer[this.type][clientAddress].data = undefined;
+    } catch (e) {
+        //Nothing at the moment
     }
     return buffer;
+};
+
+_Method.cleanByAddress = function (clientAddress) {
+    this.sharedBuffer[this.type][clientAddress].data = undefined;
+};
+
+_Method.close = function () {
+    this.worker.destroy();
 };
 
 module.exports = TcpWorker;

@@ -31,28 +31,66 @@ var client = new tcp();
 var client2 = new tcp();
 var server = new tcp();
 
-server.create("server", "127.0.0.1", "1993");
+const cCommands =
+        {"Time":
+                    {
+                        desc: 'Return current time on server',
+                        exec: (data) =>
+                        {
+                            return new Date().toString();
+                        }
+                    },
+            "Zeroes":
+                    {
+                        desc: 'Return traling zeroes',
+                        exec: (data) =>
+                        {
+                            var zeroes = 12;
+                            return zeroes.toString();
+                        }
+                    },
+            "Sum":
+                    {
+                        desc: 'Return traling zeroes',
+                        exec: (data) =>
+                        {
+                            var zeroes = data;
+                            return zeroes.toString();
+                        }
+                    }
+        };
+
+server.create("server", "127.0.0.1", "1993", cCommands);
 client.create("client", "127.0.0.1", "1993");
 client2.create("client", "127.0.0.1", "1993");
 
-console.log(client.getCommands());
+
 //client.getTime();
 //console.log(client.read());
 
-function periodic() {
-//    client.GET("Time");
-//    data = client.read();
-//    if (data !== undefined) {
-//    console.log("Client1",data);
-//    }
+console.log(server.getCommands());
 
-//    client2.GET("Time");
-//    data = client2.read();
-//    if (data !== undefined) {
-//    console.log("Client2",data);
-//    }
-    client.SET("SET Data", "2d8dQNYt1W2z5QQtUASqQ8TeqXN", 'Hello from Client1!');
-    client.SET("SET Data", "3d8dQNYt1W2z5QQtUASqQ8TeqXN", 'Hello from Client2!');
+function periodic() {
+
+    client.GET("Time", "3d8dQNYt1W2z5QQtUASqQ8TeqXN");
+    data = client.readByAddress("3d8dQNYt1W2z5QQtUASqQ8TeqXN");
+    if (data !== undefined) {
+        console.log("Client1", data);
+    }
+
+    client2.GET("Sum", "2d8dQNYt1W2z5QQtUASqQ8TeqXN", 354);
+    data = client2.readByAddress("2d8dQNYt1W2z5QQtUASqQ8TeqXN");
+    if (data !== undefined) {
+        console.log("Client2", data);
+    }
+
+    client2.GET("Sum", "2d8dQNYt1W2z5QQtUASqQ8TeqXN", 359);
+    data = client2.readByAddress("2d8dQNYt1W2z5QQtUASqQ8TeqXN");
+    if (data !== undefined) {
+        console.log("Client2", data);
+    }
+
+
 }
 
 function periodic1s() {
@@ -62,16 +100,16 @@ function periodic1s() {
 //        console.log(data);
 //    }
 
-    data = server.readByAddress('3d8dQNYt1W2z5QQtUASqQ8TeqXN');
-    if (data !== undefined) {
-        console.log(data);
-    }
-
-    data = server.readByAddress('2d8dQNYt1W2z5QQtUASqQ8TeqXN');
-    if (data !== undefined) {
-        console.log(data);
-    }
+//    data = server.readByAddress('3d8dQNYt1W2z5QQtUASqQ8TeqXN');
+//    if (data !== undefined) {
+//        console.log(data);
+//    }
+//
+//    data = server.readByAddress('2d8dQNYt1W2z5QQtUASqQ8TeqXN');
+//    if (data !== undefined) {
+//        console.log(data);
+//    }   
 }
 
-setInterval(periodic, 2000);
+setInterval(periodic, 1000);
 setInterval(periodic1s, 1000);
