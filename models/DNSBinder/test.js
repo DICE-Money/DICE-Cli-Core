@@ -30,7 +30,6 @@ var dns = new modDNS();
 dns.initializeDB('dns.json','json');
 
 dns.addServer("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS" , "127.0.0.1", "1993");
-dns.addServer("2eAvZamZ1aVhSDCbXVJ9ZbPrccdXS" , "127.0.0.1", "1993");
 
 var addr = dns.lookup("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
 
