@@ -113,6 +113,18 @@ _Method.from = function (JSONFile) {
     return DICEUnitL;
 };
 
+_Method.fromBS58 = function (bs58String) {
+    var buffer = modBase58.decode(bs58String);
+    
+    this.addrOperator = new Uint8Array(Buffer.from(buffer.slice(0,20),'hex'));
+    this.addrMiner = new Uint8Array(Buffer.from(buffer.slice(20,40),'hex'));
+    this.validZeros = new Uint8Array(1);
+    this.validZeros[0] = buffer[40];
+    this.swatchTime = new Uint8Array(Buffer.from(buffer.slice(41,45),'hex'));
+    this.payLoad = new Uint8Array(Buffer.from(buffer.slice(45,128),'hex'));
+    
+    return this;
+};
 
 _Method.toHexStringifyUnit = function () {
     var bufferDICE = new DICEUnit();
@@ -126,6 +138,24 @@ _Method.toHexStringifyUnit = function () {
 
     return bufferDICE;
 };
+
+_Method.toBS58 = function () {
+    var bufferDICE = "";
+
+    //Fill up all data
+    bufferDICE += _toHexString(this.addrOperator);
+    bufferDICE += _toHexString(this.addrMiner);
+    bufferDICE += _toHexString(this.validZeros);
+    bufferDICE += _toHexString(this.swatchTime);
+    bufferDICE += _toHexString(this.payLoad);
+
+    //Encode to BS58
+    var buffer = new Buffer.from(bufferDICE, 'hex');
+    bufferDICE = modBase58.encode(buffer);
+
+    return bufferDICE;
+};
+
 
 //Local private functions   
 function _stringToUint8Array(string, sizeOfArray) {
@@ -155,9 +185,7 @@ function _reverseUint8ArrayBytes(array) {
 }
 
 function _toHexString(byteArray) {
-    return Array.from(byteArray, function (byte) {
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-    }).join('');
+    return Buffer.from(byteArray.buffer).toString('hex');
 }
 
 function _bytesToHexstring(bytes) {
