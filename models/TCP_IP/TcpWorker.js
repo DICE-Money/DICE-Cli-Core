@@ -31,7 +31,6 @@ const modNet = require('net');
 var _Method = TcpWorker.prototype;
 
 //Local const
-
 const cSchedulerWorkMs = 10;
 const cEndOfBuffer = '#';
 const cCommandSeparator = '@';
@@ -43,6 +42,7 @@ function TcpWorker() {
     this.type = undefined;
     this.sharedBuffer = {'client': undefined, 'server': undefined};
     this.commands = {};
+    this.errorCallback =()=>{};
 }
 
 //Private
@@ -58,13 +58,14 @@ function createServer(ip, port) {
     return server;
 }
 
-function generalCallbacks(tcpWorker) {
+function generalCallbacks(tcpWorker, callback) {
     tcpWorker.on('close', function () {
         console.log('connection closed');
     });
 
     tcpWorker.on('error', function () {
         console.log('Error');
+        callback();
     });
 }
 
@@ -107,7 +108,7 @@ function dataCallbacks(tcpWorker, type, buffer, commands) {
                     console.log(e);
                 }
             });
-            
+
             c.on('error', function () {
                 console.log('Client spontaneous disconnected.');
             });
@@ -116,22 +117,28 @@ function dataCallbacks(tcpWorker, type, buffer, commands) {
 }
 
 //Public
-_Method.create = function (serverOrClient, ip, port, commands) {
+_Method.create = function (serverOrClient, ip, port, commandsOrCallback) {
     if ("server" === serverOrClient) {
         this.type = 'server';
         this.worker = createServer(ip, port);
+
+        //Save commands for server 
+        this.commands = commandsOrCallback;
+                
     } else if ("client" === serverOrClient) {
         this.type = 'client';
         this.worker = createClient(ip, port);
+
+        //Error callback for client
+        this.errorCallback = commandsOrCallback;
+        
     } else {
         throw "Invalid return request! Try \'server\' !";
     }
 
-    //Save commands
-    this.commands = commands;
 
     //set general callbacks
-    generalCallbacks(this.worker);
+    generalCallbacks(this.worker, this.errorCallback);
 
     //data managment callbacks
     dataCallbacks(this.worker, this.type, this.sharedBuffer, this.commands);
