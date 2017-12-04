@@ -36,7 +36,7 @@ const cBtitsInHex = 4;
 const cNmargin = 10;
 const cMaxValueOfDICE = 1024;
 const cMinValueOfDICE = 1/1024;
-const cInvalidDICE = "IvalidDICE";
+const cInvalidDICE = "InvalidDICE";
 
 function DICEValue() {
   this.unitValue = 1;
