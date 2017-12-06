@@ -38,11 +38,10 @@ const cDataBufferSeparator = ':';
 
 //Constructor
 function TcpWorker() {
-    this.worker = undefined;
-    this.type = undefined;
+    this.worker = {id: undefined, instance: undefined, type: undefined};
     this.sharedBuffer = {'client': undefined, 'server': undefined};
     this.commands = {};
-    this.errorCallback =()=>{};
+    this.errorCallback = {};
 }
 
 //Private
@@ -82,27 +81,36 @@ function sliceDataByAddr(data) {
     return data;
 }
 
-function dataCallbacks(tcpWorker, type, buffer, commands) {
-    if (type === 'client') {
-        tcpWorker.on('data', function (data) {
+function dataCallbacks(tcpWorker, buffer, commands) {
+    if (tcpWorker.type === 'client') {
+        tcpWorker.instance.on('data', function (data) {
             try {
-                buffer[type] = JSON.parse(data.toString());
+                /*console.log(tcpWorker.id.toString() + data.toString());*/
+                buffer[tcpWorker.type] = JSON.parse(data.toString());
             } catch (e) {
                 //Nothing
             }
         });
     } else {
-        tcpWorker.on('connection', (c) => {
+        tcpWorker.instance.on('connection', (c) => {
             c.on('data', (data) => {
-                buffer[type] = sliceDataByAddr(data);
+                buffer[tcpWorker.type] = sliceDataByAddr(data);
                 var buf = {};
                 try {
-                    for (var member in buffer[type]) {
-                        command = buffer[type][member].command;
-                        data = buffer[type][member].data;
-                        var returnData = commands[command].exec(data);
-                        buf[member] = {data: returnData};
+                    for (var addr in buffer[tcpWorker.type]) {
+                        //Get command
+                        command = buffer[tcpWorker.type][addr].command;
+
+                        //Get only data
+                        data = buffer[tcpWorker.type][addr].data;
+
+                        //Prepare return data by executing of command
+                        var returnData = commands[command].exec(data, addr);
+
+                        //Store data by address
+                        buf[addr] = {data: returnData};
                     }
+                    /*console.log(buffer[tcpWorker.type]);*/
                     c.write(JSON.stringify(buf));
                 } catch (e) {
                     console.log(e);
@@ -115,40 +123,43 @@ function dataCallbacks(tcpWorker, type, buffer, commands) {
         });
     }
 }
-
 //Public
 _Method.create = function (serverOrClient, ip, port, commandsOrCallback) {
     if ("server" === serverOrClient) {
-        this.type = 'server';
-        this.worker = createServer(ip, port);
+        this.worker.type = 'server';
+        this.worker.instance = createServer(ip, port);
 
         //Save commands for server 
         this.commands = commandsOrCallback;
-                
+
     } else if ("client" === serverOrClient) {
-        this.type = 'client';
-        this.worker = createClient(ip, port);
+        this.worker.type = 'client';
+        this.worker.instance = createClient(ip, port);
 
         //Error callback for client
         this.errorCallback = commandsOrCallback;
-        
+
     } else {
         throw "Invalid return request! Try \'server\' !";
     }
 
+    //Set unique ID
+    this.worker.id = Math.round((Math.random() * 10000));
 
     //set general callbacks
-    generalCallbacks(this.worker, this.errorCallback);
+    generalCallbacks(this.worker.instance, this.errorCallback);
 
     //data managment callbacks
-    dataCallbacks(this.worker, this.type, this.sharedBuffer, this.commands);
+    dataCallbacks(this.worker, this.sharedBuffer, this.commands);
 };
 
-_Method.GET = function (command, clientAddr, dataBuffer) {
-    if (this.type === 'client') {
+
+//This function can be called only in Client context
+_Method.Request = function (command, clientAddr, dataBuffer) {
+    if (this.worker.type === 'client') {
         var data = {};
         data = ({addr: clientAddr, command: command, data: dataBuffer});
-        this.worker.write(JSON.stringify(data) + cEndOfBuffer);
+        this.worker.instance.write(JSON.stringify(data) + cEndOfBuffer);
     }
 };
 
@@ -157,10 +168,10 @@ _Method.getCommands = function () {
 };
 
 _Method.readRaw = function () {
-    if (this.type === 'client') {
+    if (this.worker.type === 'client') {
         var buffer;
-        buffer = this.sharedBuffer[this.type];
-        this.sharedBuffer[this.type] = undefined;
+        buffer = this.sharedBuffer[this.worker.type];
+        this.sharedBuffer[this.worker.type] = undefined;
         return buffer;
     }
 };
@@ -168,8 +179,8 @@ _Method.readRaw = function () {
 _Method.readByAddress = function (clientAddress) {
     var buffer;
     try {
-        buffer = this.sharedBuffer[this.type][clientAddress].data;
-        this.sharedBuffer[this.type][clientAddress].data = undefined;
+        buffer = this.sharedBuffer[this.worker.type][clientAddress].data;
+        this.sharedBuffer[this.worker.type][clientAddress].data = undefined;
     } catch (e) {
         //Nothing at the moment
     }
@@ -177,11 +188,11 @@ _Method.readByAddress = function (clientAddress) {
 };
 
 _Method.cleanByAddress = function (clientAddress) {
-    this.sharedBuffer[this.type][clientAddress].data = undefined;
+    this.sharedBuffer[this.worker.type][clientAddress].data = undefined;
 };
 
 _Method.close = function () {
-    this.worker.destroy();
+    this.worker.instance.destroy();
 };
 
 module.exports = TcpWorker;
