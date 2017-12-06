@@ -26,8 +26,8 @@
 
 
 const modEnc = require('./Encryptor.js');
-const crypto = require('crypto');
-const modBS58 = require('bs58');
+//const crypto = require('crypto');
+//const modBS58 = require('bs58');
 
 
 // 1. Init Key and Address

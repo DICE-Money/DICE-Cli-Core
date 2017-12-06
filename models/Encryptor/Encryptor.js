@@ -33,6 +33,10 @@ var _Method = Encryptor.prototype;
 //Local const
 const cIV_LENGTH = 16; // For AES, this is always 16
 
+//Public const
+_Method.cDEFAULT_CURVE_TYPE = 'sect131r1';
+_Method.cDEFAULT_CHECKSUM_SIZE = 2;
+
 //Constructor
 function Encryptor(privateKey, curveType, checkSumSize) {
     this._privateKey = _checkForNull(privateKey);
