@@ -83,7 +83,7 @@ _Method.setSwatchTime = function (float) {
 _Method.setPayload = function (Uint8Array_83) {
     if (null !== Uint8Array_83 &
             this.payLoad.length >= Uint8Array_83.length) {
-        this.payLoad = Uint8Array_83;
+        this.payLoad = new Uint8Array(Uint8Array_83);
     } else {
         throw "Error Invalid PayloadArray!";
     }
@@ -172,16 +172,6 @@ function _bs58AddrToRaw(string) {
     var bytes = modBase58.decode(string);
     var u8Array = new Uint8Array(bytes);
     return u8Array;
-}
-
-function _reverseUint8ArrayBytes(array) {
-    var arrayCounter = 0;
-    var bufArray = new Uint8Array(array.length);
-    for (var i = (bufArray.length - 1); i >= 0; i--) {
-        bufArray[i] = array[arrayCounter];
-        arrayCounter++;
-    }
-    return bufArray;
 }
 
 function _toHexString(byteArray) {

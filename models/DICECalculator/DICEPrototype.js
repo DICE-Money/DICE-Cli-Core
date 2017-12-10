@@ -24,6 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+//Required 3rd-party libraries
+const modBase58 = require('bs58');
+
 var _Method = DICEPrototype.prototype;
 
 function DICEPrototype() {
@@ -58,6 +61,7 @@ _Method.setSwatchTime = function (SwatchTime) {
         throw "Error Invalid SwatchTime!";
     }
 };
+
 /**
  * Creates a new Uint8Array based on all data in Current Prototype
  *
@@ -82,6 +86,38 @@ _Method.toUint8Array = function () {
     return bufArray;
 };
 
-//Local private functions   
+_Method.fromBS58 = function (bs58String) {
+    var buffer = modBase58.decode(bs58String);
+    
+    this.addrOperator = new Uint8Array(Buffer.from(buffer.slice(0,20),'hex'));
+    this.addrMiner = new Uint8Array(Buffer.from(buffer.slice(20,40),'hex'));
+    this.validZeros = new Uint8Array(1);
+    this.validZeros[0] = buffer[40];
+    this.swatchTime = new Uint8Array(Buffer.from(buffer.slice(41,45),'hex'));
+    this.SHA3PayLoad = new Uint8Array(Buffer.from(buffer.slice(45,109),'hex'));
+    
+    return this;
+};
 
+_Method.toBS58 = function () {
+    var bufferDICE = "";
+
+    //Fill up all data
+    bufferDICE += _toHexString(this.addrOperator);
+    bufferDICE += _toHexString(this.addrMiner);
+    bufferDICE += _toHexString(this.validZeros);
+    bufferDICE += _toHexString(this.swatchTime);
+    bufferDICE += _toHexString(this.SHA3PayLoad);
+
+    //Encode to BS58
+    var buffer = new Buffer.from(bufferDICE, 'hex');
+    bufferDICE = modBase58.encode(buffer);
+
+    return bufferDICE;
+};
+
+//Local private functions   
+function _toHexString(byteArray) {
+    return Buffer.from(byteArray.buffer).toString('hex');
+}
 module.exports = DICEPrototype;
