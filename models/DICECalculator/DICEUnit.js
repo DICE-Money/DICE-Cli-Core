@@ -25,7 +25,8 @@
  */
 
 //Required 3rd-party libraries
-const modBase58 = require('bs58');
+var modBase58 = require('../Base58/Base58.js');
+modBase58 = new modBase58();
 
 //Class access 
 var _Method = DICEUnit.prototype;

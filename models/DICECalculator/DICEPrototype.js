@@ -25,7 +25,8 @@
  */
 
 //Required 3rd-party libraries
-const modBase58 = require('bs58');
+var modBase58 = require('../Base58/Base58.js');
+modBase58 = new modBase58();
 
 var _Method = DICEPrototype.prototype;
 
@@ -78,10 +79,10 @@ _Method.toUint8Array = function () {
             this.SHA3PayLoad.byteLength);
 
     bufArray.set(new Uint8Array(this.addrOperator.buffer), 0);
-    bufArray.set(new Uint8Array(this.addrMiner.buffer), this.addrOperator.byteLength);
-    bufArray.set(new Uint8Array(this.validZeros.buffer), this.addrMiner.byteLength);
-    bufArray.set(new Uint8Array(this.swatchTime.buffer), this.validZeros.byteLength);
-    bufArray.set(new Uint8Array(this.SHA3PayLoad.buffer), this.swatchTime.byteLength);
+    bufArray.set(new Uint8Array(this.addrMiner.buffer), 20);
+    bufArray.set(new Uint8Array(this.validZeros.buffer), 40);
+    bufArray.set(new Uint8Array(this.swatchTime.buffer), 41);
+    bufArray.set(new Uint8Array(this.SHA3PayLoad.buffer), 45);
 
     return bufArray;
 };

@@ -26,11 +26,13 @@
 
 //Required 3rd-party libraries
 const modCrypto = require('crypto');
-const modSHA3_C = require('../SHA-3_C/build/Release/sha3_C_Addon');
+const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
 const modSHA3 = require('js-sha3');
 const modSwatchTimer = require('../SwatchBeats/SwatchTimer.js');
 const modDICEUnit = require('./DICEUnit.js');
 const modDICEPrototype = require('./DICEPrototype.js');
+const modChild_process = require('child_process');
+const modFs = require('fs');
 
 //Const parameters
 const cMaxValidZeros = 256;
@@ -60,6 +62,7 @@ function DICECalculator(shaType) {
         this.sha3 = modSHA3;
     }
     this.sha3Counter = 0;
+    this.type = shaType;
 }
 
 //#############################################################################
@@ -88,7 +91,22 @@ _Method.Alive = function () {
  * @return {DICEUnit} unit - valid DICE unit
  */
 _Method.getValidDICE = function (addrOp, addrMin, validZeroes) {
-    return _CalculateDICEUnit(addrOp, addrMin, validZeroes, this.sha3, this.sha3Counter);
+    return _CalculateDICEUnit(addrOp, addrMin, validZeroes, this.sha3, this.sha3Counter,this.type);
+};
+
+/**
+ * Invoke calculation of new DICE Unit.
+ * Contains a busy loop.
+ * @public
+ * @param {String} addrOp - Digital Address of Operator
+ * @param {String} addrMin - Digital Address of Miner
+ * @param {Integer} validZeroes - Minimum required zeroes in hash of prototype
+ * @param {String} cudaAppPath - Path to Cuda application
+ * @param {String} outputFile - File to store calculated Unit
+ * @return {DICEUnit} unit - valid DICE unit
+ */
+_Method.getValidDICE_CUDA = function (addrOp, addrMin, validZeros, cudaAppPath, outputFile) {
+    return  _CalculateDICEUnitCUDA(addrOp, addrMin, validZeros, cudaAppPath, outputFile);
 };
 
 /**
@@ -99,7 +117,7 @@ _Method.getValidDICE = function (addrOp, addrMin, validZeroes) {
  * @return {Buffer} SHA3 of DICE Unit 
  */
 _Method.getSHA3OfUnit = function (DICEUnit) {
-    return _GetSHA3OfValidUnit(DICEUnit, this.sha3, this.sha3Counter);
+    return _GetSHA3OfValidUnit(DICEUnit, this.sha3, this.sha3Counter,this.type);
 };
 
 /**
@@ -110,7 +128,7 @@ _Method.getSHA3OfUnit = function (DICEUnit) {
  * @return {Buffer} SHA3 of DICE Prototype. 
  */
 _Method.getSHA3OfProtoType = function (DICEProto) {
-    return _GetSHA3OfValidPrototype(DICEProto, this.sha3, this.sha3Counter);
+    return _GetSHA3OfValidPrototype(DICEProto, this.sha3, this.sha3Counter, this.type);
 };
 
 /**
@@ -133,7 +151,7 @@ _Method.getHexLookingTable = function (countOfZeroes) {
  * @return {String} data in hex.
  */
 _Method.CalculateSHA3_512 = function (buffer) {
-    return _CalculateSHA3_512(buffer, this.sha3, this.sha3Counter);
+    return _CalculateSHA3_512(buffer, this.sha3, this.sha3Counter, this.type);
 };
 
 /**
@@ -168,9 +186,15 @@ function _CalculatePayload(DICEUnit) {
  * @param {Integer} counter - increment the counter when function called.
  * @return {String} data in hex.
  */
-function _CalculateSHA3_512(buffer, sha3, counter) {
+function _CalculateSHA3_512(buffer, sha3, counter, type) {
     counter++;
-    return sha3.sha3_512(buffer);
+    var bufferL = undefined;
+    if (type === 'c') {
+        bufferL = Buffer.from(buffer).toString('hex');
+    }else{
+        bufferL = buffer;
+    }
+    return sha3.sha3_512(bufferL);
 }
 
 function _PrepareHeader(addrOp, addrMin, validZeros, DICEUnit) {
@@ -206,7 +230,7 @@ function _CheckValidZeroes(SHA_DICEPrototype, countOfValiZeros) {
     return isInvalid;
 }
 
-function _CalculateDICEUnit(addrOp, addrMin, validZeros, sha3, counter) {
+function _CalculateDICEUnit(addrOp, addrMin, validZeros, sha3, counter, type) {
     var isInValidDICE = true;
     var DICEUnit = new modDICEUnit();
     var DICEPrototypeL = new modDICEPrototype();
@@ -227,11 +251,11 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros, sha3, counter) {
 
         //Create Prototype from Unit and hashing of Payload
         DICEPrototypeL.setSwatchTime(DICEUnit.swatchTime);
-        SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter );
+        SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter,type);
         DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
 
         //Create SHA3-512 to whole Prototype
-        SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array(), sha3, counter);
+        SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array(), sha3, counter,type);
 
         //Validate
         isInValidDICE = _CheckValidZeroes(SHA_DICEPrototype, DICEPrototypeL.validZeros[0]);
@@ -240,7 +264,34 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros, sha3, counter) {
     return DICEUnit;
 }
 
-function _GetSHA3OfValidUnit(DICEUnit, sha3, counter) {
+function _CalculateDICEUnitCUDA(addrOp, addrMin, validZeros, cudaAppPath, outputFile) {
+    var DICEUnit = new modDICEUnit();
+    var DICEUnitJson = new modDICEUnit();
+    modChild_process.execFileSync(cudaAppPath, [outputFile, addrOp, addrMin, _byteToHex(validZeros.toString())], {stdio: ['pipe', process.stdout, process.stderr]});
+    var file = modFs.readFileSync(outputFile, "utf8");
+    try {
+        DICEUnitJson = DICEUnit.from(file);
+
+        //Assing data to real bject
+        DICEUnit.addrOperator = DICEUnitJson.addrOperator;
+        DICEUnit.addrMiner = DICEUnitJson.addrMiner;
+        DICEUnit.validZeros = DICEUnitJson.validZeros;
+        DICEUnit.swatchTime = DICEUnitJson.swatchTime;
+        DICEUnit.payLoad = DICEUnitJson.payLoad;
+
+        modFs.unlink(outputFile, function (error) {
+            if (error) {
+                throw error;
+            }
+        });
+    } catch (e)
+    {
+        //Nothing
+    }
+    return DICEUnit;
+}
+
+function _GetSHA3OfValidUnit(DICEUnit, sha3, counter, type) {
     var DICEPrototypeL = new modDICEPrototype();
     var SHA_PayLoad = "";
 
@@ -248,16 +299,16 @@ function _GetSHA3OfValidUnit(DICEUnit, sha3, counter) {
     DICEPrototypeL.fromDICEUnit(DICEUnit);
 
     //First SHA of Payload and save it
-    SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter);
+    SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter, type);
     DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
 
-    return _GetSHA3OfValidPrototype(DICEPrototypeL, sha3, counter);
+    return _GetSHA3OfValidPrototype(DICEPrototypeL, sha3, counter,type);
 }
 
-function _GetSHA3OfValidPrototype(DICEProto, sha3, counter) {
+function _GetSHA3OfValidPrototype(DICEProto, sha3, counter, type) {
 
     //Create SHA of whole DICE Unit
-    SHA_DICEPrototype = _CalculateSHA3_512(DICEProto.toUint8Array(), sha3, counter);
+    SHA_DICEPrototype = _CalculateSHA3_512(DICEProto.toUint8Array(), sha3, counter, type);
 
     return SHA_DICEPrototype;
 }
@@ -285,5 +336,14 @@ function _getTableForRightAlign(countOfZeroes) {
     return rightTable;
 }
 
+function _byteToHex(b) {
+    var hexChar = ["0", "1", "2", "3",
+        "4", "5", "6", "7",
+        "8", "9", "A", "B",
+        "C", "D", "E", "F"];
+    var hexValue = hexChar[(b >> 4) & 0x0f] + hexChar[b & 0x0f];
+
+    return hexValue;
+}
 // export the class
 module.exports = DICECalculator;
