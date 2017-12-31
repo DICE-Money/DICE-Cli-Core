@@ -26,7 +26,8 @@
 
 var tcp = require('./TcpWorker.js');
 var tcp = require('./TcpWorker.js');
-const modBase58 = require('bs58');
+var modBase58 = require('../Base58/Base58.js');
+modBase58 = new modBase58();
 
 var client = new tcp();
 var client2 = new tcp();

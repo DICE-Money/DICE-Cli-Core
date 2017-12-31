@@ -57,14 +57,17 @@ function createServer(ip, port) {
     return server;
 }
 
-function generalCallbacks(tcpWorker, callback) {
+function generalCallbacks(tcpWorker, callback, view) {
     tcpWorker.on('close', function () {
-        console.log('connection closed');
+        view.printCode("WARNING", "Warn0021");
     });
 
     tcpWorker.on('error', function () {
-        console.log('Error');
-        callback();
+        try {
+            callback();
+        } catch (e) {
+            view.printCode("ERROR", "Err0002");
+        }
     });
 }
 
@@ -81,11 +84,11 @@ function sliceDataByAddr(data) {
     return data;
 }
 
-function dataCallbacks(tcpWorker, buffer, commands) {
+function dataCallbacks(tcpWorker, buffer, commands, view) {
     if (tcpWorker.type === 'client') {
         tcpWorker.instance.on('data', function (data) {
             try {
-                /*console.log(tcpWorker.id.toString() + data.toString());*/
+                view.printCode("DEV_INFO", "DevInf0113", data.toString());
                 buffer[tcpWorker.type] = JSON.parse(data.toString());
             } catch (e) {
                 //Nothing
@@ -100,7 +103,7 @@ function dataCallbacks(tcpWorker, buffer, commands) {
                     for (var addr in buffer[tcpWorker.type]) {
                         //Get command
                         command = buffer[tcpWorker.type][addr].command;
-
+                        
                         //Get only data
                         data = buffer[tcpWorker.type][addr].data;
 
@@ -110,21 +113,21 @@ function dataCallbacks(tcpWorker, buffer, commands) {
                         //Store data by address
                         buf[addr] = {data: returnData};
                     }
-                    /*console.log(buffer[tcpWorker.type]);*/
+                    view.printCode("DEV_INFO", "DevInf0113",JSON.stringify(buffer[tcpWorker.type]));
                     c.write(JSON.stringify(buf));
                 } catch (e) {
-                    console.log(e);
+                    view.printCode("ERROR", "Err0003");
                 }
             });
 
             c.on('error', function () {
-                console.log('Client spontaneous disconnected.');
+                view.printCode("WARNING", "Warn0022");
             });
         });
     }
 }
 //Public
-_Method.create = function (serverOrClient, ip, port, commandsOrCallback) {
+_Method.create = function (serverOrClient, ip, port, commandsOrCallback, view) {
     if ("server" === serverOrClient) {
         this.worker.type = 'server';
         this.worker.instance = createServer(ip, port);
@@ -147,10 +150,10 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback) {
     this.worker.id = Math.round((Math.random() * 10000));
 
     //set general callbacks
-    generalCallbacks(this.worker.instance, this.errorCallback);
+    generalCallbacks(this.worker.instance, this.errorCallback, view);
 
     //data managment callbacks
-    dataCallbacks(this.worker, this.sharedBuffer, this.commands);
+    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view);
 };
 
 

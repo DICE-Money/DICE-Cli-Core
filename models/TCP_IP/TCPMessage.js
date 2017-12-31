@@ -24,32 +24,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-var net = require('net');
-var command = 'GET Time';
+//Required
 
-const server = net.createServer((c) => {
-    console.log('client connected');
+//Class access 
+var _Method = TCPMessage.prototype;
 
-    c.on('end', () => {
-        console.log('client disconnected');
-    });
+//Local const
 
-//    c.on('data', (data) => {
-//        if (command === data.toString()) {
-//            c.write(new Date().toString());
-//        }
-//    });
-});
+function TCPMessage() {
+    //1024bit or 128 byte Dice raw prototype
+    this.addr = new Uint8Array(20);
+    this.value = new Uint8Array(2);
+    this.hash = new Uint8Array(64);
+}
 
-server.on('error', function () {
-    console.log('Error');
-});
+_Method.TCPMessage = function () {
 
-server.listen('1993', '127.0.0.1');
-server.on('connection', (c) => {
-    c.on('data', (data) => {
-        if (command === data.toString()) {
-            c.write(new Date().toString());
-        }
-    });
-});
+};
+
+module.exports = TCPMessage;
