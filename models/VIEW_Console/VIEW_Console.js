@@ -80,7 +80,7 @@ _Method.printCodeMapRpc = function (type, code, data) {
         if (this.defPortInit !== this.codeTable[type][code].data) {
             console.log("{", code, ":", " { data:", this.codeTable[type][code].data, "} }");
         } else {
-            console.log("{ ", code," }");
+            console.log("{", code,"}");
         }
     }
 };
