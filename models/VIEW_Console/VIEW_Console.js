@@ -80,19 +80,29 @@ _Method.printCodeMapRpc = function (type, code, data) {
         if (this.defPortInit !== this.codeTable[type][code].data) {
             console.log("{", code, ":", " { data:", this.codeTable[type][code].data, "} }");
         } else {
-            console.log("{", code,"}");
+            console.log("{", code, "}");
         }
     }
 };
 
 _Method.print = function (text, placeHolder) {
-    console.log(text, placeHolder);
+    if (undefined !== placeHolder) {
+        console.log(text, placeHolder);
+    } else {
+        console.log(text);
+    }
 };
 
 _Method.getTextByCode = function (type, code) {
     var text = "";
     if (true === this.allowedTypes[type]) {
-        text = this.codeTable[type][code].str.replace("%s", this.codeTable[type][code].data);
+        if ('text' === this.printCodes) {
+            text = this.codeTable[type][code].str.replace("%s", this.codeTable[type][code].data);
+        } else if ('code' === this.printCodes) {
+            text = (code);
+        } else if ('rpc' === this.printCodes) {
+            text = ("{", code, "}");;
+        }
     }
     return text;
 };
