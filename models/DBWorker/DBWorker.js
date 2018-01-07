@@ -31,7 +31,11 @@ const modFs = require('fs');
 var _Method = DBWorker.prototype;
 
 //Local const
-//None
+const cUnitStatuses = {
+    new : "new",
+    claimed: "claimed",
+    traded: "traded"
+};
 
 //Construtor
 function DBWorker() {
@@ -48,29 +52,63 @@ function _checkForNull(data) {
 }
 
 //Public Methods
-_Method.getDICEUnits = function (addrOp) {
-    return this.fileDB[_checkForNull(addrOp)];
+_Method.getDICEProto = function (hashOfProto) {
+    return this.fileDB[_checkForNull(hashOfProto)];
 };
 
-_Method.remove = function (addrOp) {
-    delete this.fileDB[_checkForNull(addrOp)];
+_Method.getNewOwner = function (hashOfProto) {
+    var returnData = undefined;
+    try {
+        returnData = this.fileDB[_checkForNull(hashOfProto)]["newOwner"];
+    } catch (e) {
+        //Nothing
+    }
+    return returnData;
+};
+
+_Method.getCurrentOwner = function (hashOfProto) {
+    var returnData = undefined;
+    try {
+        returnData = this.fileDB[_checkForNull(hashOfProto)]["curOwner"];
+    } catch (e) {
+        //Nothing
+    }
+    return returnData;
+};
+
+_Method.addDICEProto = function (hashOfProto, addr, diceProto) {
+    var unitData = {};
+    unitData["proto"] = _checkForNull(diceProto);
+    unitData["curOwner"] = _checkForNull(addr);
+    unitData["newOwner"] = "";
+
+    this.fileDB[_checkForNull(hashOfProto)] = unitData;
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };
 
-_Method.addDICEUnit = function (addr, diceProto) {
-    var counter = 0;
-    var units = [];
-    try{
-        while (this.fileDB[_checkForNull(addr)][counter] !== undefined) {
-            units[counter] = this.fileDB[_checkForNull(addr)][counter];
-            counter++;            
-        }
-    }catch (e){
+_Method.writeNewOwner = function (hashOfProto, newOwner) {
+    this.fileDB[_checkForNull(hashOfProto)]["newOwner"] = _checkForNull(newOwner);
+    modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+};
+
+_Method.writeCurrentOwner = function (hashOfProto, curOwner) {
+    this.fileDB[_checkForNull(hashOfProto)]["curOwner"] = _checkForNull(curOwner);
+    this.fileDB[_checkForNull(hashOfProto)]["newOwner"] = "";
+    modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+};
+
+_Method.isNewOwnerEmpty = function (hashOfProto) {
+    var returnData = undefined;
+    try {
+        return  (this.fileDB[_checkForNull(hashOfProto)]["newOwner"] === "");
+    } catch (e) {
         //Nothing
     }
-    
-    units[counter] = _checkForNull(diceProto);
-    this.fileDB[_checkForNull(addr)] =  units;
+    return returnData;
+};
+
+_Method.remove = function (hashOfProto) {
+    delete this.fileDB[_checkForNull(hashOfProto)];
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };
 
@@ -93,6 +131,15 @@ _Method.initializeDB = function (pathToStorage, typeOfStorage) {
 _Method.clean = function () {
     this.fileDB = {};
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+};
+
+_Method.remove = function (hashOfProto) {
+    delete this.fileDB[_checkForNull(hashOfProto)];
+    modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+};
+
+_Method.getStatuses = function () {
+    return cUnitStatuses;
 };
 
 module.exports = DBWorker;
