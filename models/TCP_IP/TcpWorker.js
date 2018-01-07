@@ -66,6 +66,7 @@ function generalCallbacks(tcpWorker, callback, view) {
         try {
             callback();
         } catch (e) {
+            this.close();
             view.printCode("ERROR", "Err0002");
         }
     });
