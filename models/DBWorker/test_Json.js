@@ -27,12 +27,29 @@
 const modDB = require('./DBWorker_Json.js');
 
 var db = new modDB();
+
+//Init db
 db.initializeDB('diceDB.json','json');
 
-db.addDICEUnit("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS" , "pesho");
+//Add unit
+db.addDICEProto("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS" , "niko", "ssss");
 
-var data = db.getDICEUnits("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
-
+//Check is empty
+var data = db.isNewOwnerEmpty("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS88");
 console.log(data);
 
-//dns.clean();getDICEUnits
+//Ready data back from DB
+var data = db.getDICEProto("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Get newOwner
+var data = db.getNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Write New Owner and check data back
+db.writeNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS", "shososho");
+var data = db.getNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Drop The Table
+db.clean();

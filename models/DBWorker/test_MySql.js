@@ -24,15 +24,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-const modDB = require('./DBWorker_Json.js');
+const modDB = require('./DBWorker_MySql.js');
 
 var db = new modDB();
-db.initializeDB('diceDB.json','json');
 
-db.addDICEUnit("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS" , "pesho");
+//Configure new DB
+db.configDB("localhost","diceUser","DfIoKeVfk7P8JXKc");
 
-var data = db.getDICEUnits("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+//Create New DB
+db.createDB('3SEdktQGS4K947PUadvbHFD2oJGdsada');
 
+//Add unit
+db.addDICEProto("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS" , "niko", "ssss");
+
+//Check is empty
+var data = db.isNewOwnerEmpty("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS88");
 console.log(data);
 
-//dns.clean();getDICEUnits
+//Ready data back from DB
+var data = db.getDICEProto("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Get newOwner
+var data = db.getNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Write New Owner and check data back
+db.writeNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS", "shososho");
+var data = db.getNewOwner("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
+console.log(data);
+
+//Drop The Table
+db.clean();

@@ -26,19 +26,14 @@
 
 //Required
 const modFs = require('fs');
+const modMySql = require('sync-mysql');
 
 //Class access 
-var _Method = DBWorker.prototype;
+var _Method = DBWorker_Json.prototype;
 
 //Local const
-const cUnitStatuses = {
-    new : "new",
-    claimed: "claimed",
-    traded: "traded"
-};
-
 //Construtor
-function DBWorker() {
+function DBWorker_Json() {
     this.filePath = undefined;
     this.fileDB = {};
 }
@@ -131,15 +126,12 @@ _Method.initializeDB = function (pathToStorage, typeOfStorage) {
 _Method.clean = function () {
     this.fileDB = {};
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+    modFs.unlink(this.filePath,()=>{});
 };
 
-_Method.remove = function (hashOfProto) {
+_Method.remove= function (hashOfProto) {
     delete this.fileDB[_checkForNull(hashOfProto)];
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };
 
-_Method.getStatuses = function () {
-    return cUnitStatuses;
-};
-
-module.exports = DBWorker;
+module.exports = DBWorker_Json;
