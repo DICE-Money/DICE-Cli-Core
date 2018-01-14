@@ -104,18 +104,19 @@ function dataCallbacks(tcpWorker, buffer, commands, view) {
                     for (var addr in buffer[tcpWorker.type]) {
                         //Get command
                         command = buffer[tcpWorker.type][addr].command;
-                        
+
                         //Get only data
                         data = buffer[tcpWorker.type][addr].data;
 
                         //Prepare return data by executing of command
-                        var returnData = commands[command].exec(data, addr);
-
-                        //Store data by address
-                        buf[addr] = {data: returnData};
+                        commands[command].exec(data, addr, (data) => {
+                            //Async invoking
+                            //Store data by address
+                            buf[addr] = {data: data};
+                            view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
+                            c.write(JSON.stringify(buf));
+                        });
                     }
-                    view.printCode("DEV_INFO", "DevInf0113",JSON.stringify(buffer[tcpWorker.type]));
-                    c.write(JSON.stringify(buf));
                 } catch (e) {
                     view.printCode("ERROR", "Err0003");
                 }
