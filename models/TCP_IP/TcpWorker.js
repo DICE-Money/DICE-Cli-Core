@@ -118,6 +118,8 @@ function dataCallbacks(tcpWorker, buffer, commands, view) {
                         });
                     }
                 } catch (e) {
+                    buf[addr] = {data: view.getTextByCode("ERROR", "Err0003")};
+                    c.write(JSON.stringify(buf));
                     view.printCode("ERROR", "Err0003");
                 }
             });
