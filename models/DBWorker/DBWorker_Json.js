@@ -77,7 +77,11 @@ _Method.addDICEProto = function (hashOfProto, addr, diceProto) {
     unitData["curOwner"] = _checkForNull(addr);
     unitData["newOwner"] = "";
 
-    this.fileDB[_checkForNull(hashOfProto)] = unitData;
+    //Add unit if its not exist
+    if (!this.fileDB.hasOwnProperty(_checkForNull(hashOfProto))) {
+        this.fileDB[_checkForNull(hashOfProto)] = unitData;
+    }
+
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };
 
@@ -126,10 +130,11 @@ _Method.initializeDB = function (pathToStorage, typeOfStorage) {
 _Method.clean = function () {
     this.fileDB = {};
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
-    modFs.unlink(this.filePath,()=>{});
+    modFs.unlink(this.filePath, () => {
+    });
 };
 
-_Method.remove= function (hashOfProto) {
+_Method.remove = function (hashOfProto) {
     delete this.fileDB[_checkForNull(hashOfProto)];
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
 };

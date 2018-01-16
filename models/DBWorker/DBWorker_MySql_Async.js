@@ -26,10 +26,10 @@
 
 //Required
 const modFs = require('fs');
-const modMySql = require('sync-mysql');
+const modMySql = require('mysql');
 
 //Class access 
-var _Method = DBWorker_MySql.prototype;
+var _Method = DBWorker_MySql_Async.prototype;
 
 //Local const
 const cDB_Name = "DICE_DB";
@@ -45,12 +45,11 @@ const cDB_Table_Columns =
 const cDice_Table_Prefix = "operator_";
 
 //Construtor
-function DBWorker_MySql() {
-    this.filePath = undefined;
-    this.fileDB = {};
+function DBWorker_MySql_Async() {
     this.connection = undefined;
     this.table = undefined;
     this.config = undefined;
+    this.addrOp = undefined;
 }
 
 //Private Methods
@@ -62,14 +61,14 @@ function _checkForNull(data) {
 }
 
 //Public Methods
-_Method.clean = function () {
+_Method.clean = function (finishCallback) {
     var sql = `DROP TABLE ${this.table}`;
-    this.sqlRequest(sql);
+    this.connection.query(sql, finishCallback);
 };
 
-_Method.remove = function (hashOfProto) {
+_Method.remove = function (hashOfProto, finishCallback) {
     var sql = `DELETE FROM ${this.table} WHERE WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}`;
-    this.sqlRequest(sql);
+    this.connection.query(sql, finishCallback);
 };
 
 //MySqL Database
@@ -81,11 +80,12 @@ _Method.configDB = function (host, user, password) {
     };
 };
 
-_Method.createDB = function (addrOp) {
+_Method.createDB = function (addrOp, finishCallback) {
 
     //Establish connection
-    this.connection = new modMySql(this.config);
-
+    this.connection = modMySql.createConnection(this.config);
+    this.addrOp = addrOp;
+    
     //Local data
     var sql = "";
 
@@ -94,18 +94,23 @@ _Method.createDB = function (addrOp) {
 
     //Send request to create DATABSE
     sql = `CREATE DATABASE IF NOT EXISTS ${cDB_Name}`;
-    this.sqlRequest(sql);
+    this.connection.query(sql, dbCreation);
 
     //Change DB Name
-    this.connection = new modMySql({
+    this.connection = modMySql.createConnection({
         host: this.config.host,
         user: this.config.user,
         password: this.config.password,
         database: cDB_Name
     });
 
-    //Send request to create DATABSE
-    var sql = `CREATE TABLE IF NOT EXISTS operator_${addrOp} 
+    var connection = this.connection;
+
+    //After DB was cheked, we need to create Table 
+    function dbCreation() {
+
+        //Send request to create DATABSE
+        var sql = `CREATE TABLE IF NOT EXISTS operator_${addrOp} 
                (${cDB_Table_Columns.id.name} INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
                 ${cDB_Table_Columns.hash.name} VARCHAR(255), 
                 ${cDB_Table_Columns.proto.name} VARCHAR(512), 
@@ -113,120 +118,149 @@ _Method.createDB = function (addrOp) {
                 ${cDB_Table_Columns.newOwner.name} VARCHAR(40),
                 ${cDB_Table_Columns.modified.name} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`;
 
-    this.sqlRequest(sql);
+        connection.query(sql, finishCallback);
+    }
 };
 
-_Method.getDICEProto = function (hashOfProto) {
-    var returnData = undefined;
+
+_Method.getDICEProto = function (hashOfProto, finishCallback) {
+    //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
-    returnData = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
     //Get CurOwner
-    returnData = returnData[0];
-
-    return returnData;
+    function returnData(err, res, fie) {
+        var diceProto = res[0];
+        finishCallback(diceProto);
+    }
 };
 
-_Method.getNewOwner = function (hashOfProto) {
-    var returnData = undefined;
+_Method.getNewOwner = function (hashOfProto, finishCallback) {
+    //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
-    returnData = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
     //Get NewOwner
-    try {
-        returnData = returnData[0][cDB_Table_Columns.newOwner.name];
-    } catch (e) {
-        //Nothing
-        //The Item does not exist
+    function returnData(err, res, fie) {
+        try {
+            var newOwner = res[0][cDB_Table_Columns.newOwner.name];
+        } catch (e) {
+            //Nothing
+            //The Item does not exist
+        }
+        finishCallback(newOwner);
     }
-
-    return returnData;
 };
 
-_Method.getCurrentOwner = function (hashOfProto) {
-    var returnData = undefined;
+_Method.getCurrentOwner = function (hashOfProto, finishCallback) {
+    //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
-    returnData = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
     //Get CurOwner
-    try {
-        returnData = returnData[0][cDB_Table_Columns.curOwner.name];
-    } catch (e) {
-        //Nothing
-        //The Item does not exist
+    function returnData(err, res, fie) {
+        try {
+            var curOwner = res[0][cDB_Table_Columns.curOwner.name];
+        } catch (e) {
+            //Nothing
+            //The Item does not exist
+        }
+        finishCallback(curOwner);
     }
-
-    return returnData;
 };
 
 
-_Method.writeNewOwner = function (hashOfProto, newOwner) {
+_Method.writeNewOwner = function (hashOfProto, newOwner, finishCallback) {
     //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
     var updateSql = `UPDATE ${this.table} SET ${cDB_Table_Columns.newOwner.name}="${newOwner}" WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}"`;
 
     //Get data
-    var result = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
-    //Add or Update
-    if (result.toString() !== "") {
-        this.sqlRequest(updateSql);
+    function returnData(err, res, fie) {
+        //Add or Update
+        if (res.toString() !== "") {
+            connection.query(updateSql, finishCallback);
+        } else {
+            finishCallback();
+        }
     }
 };
 
-_Method.writeCurrentOwner = function (hashOfProto, curOwner) {
+_Method.writeCurrentOwner = function (hashOfProto, curOwner, finishCallback) {
     //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
     var updateSql = `UPDATE ${this.table} SET ${cDB_Table_Columns.curOwner.name}="${curOwner}", ${cDB_Table_Columns.newOwner.name}=NULL WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}"`;
 
     //Get data
-    var result = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
-    //Add or Update
-    if (result.toString() !== "") {
-        this.sqlRequest(updateSql);
+    function returnData(err, res, fie) {
+        //Add or Update
+        if (res.toString() !== "") {
+            connection.query(updateSql, finishCallback);
+        } else {
+            finishCallback();
+        }
     }
 };
 
 
-_Method.isNewOwnerEmpty = function (hashOfProto) {
-    var returnData = undefined;
+_Method.isNewOwnerEmpty = function (hashOfProto, finishCallback) {
+    //Request to DB
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
-    returnData = this.sqlRequest(dataSql);
+    var connection = this.connection;
+    connection.query(dataSql, returnData);
 
     //Check for null
-    try {
-        if (returnData[0][cDB_Table_Columns.newOwner.name] === null) {
-            returnData = true;
-        } else {
-            returnData = false;
+    function returnData(err, res, fie) {
+        try {
+            if (res[0][cDB_Table_Columns.newOwner.name] === null) {
+                returnData = true;
+            } else {
+                returnData = false;
+            }
+            finishCallback(returnData);
+        } catch (e) {
+            //Nothing
+            //The Item does not exist
+            finishCallback(true);
         }
-    } catch (e) {
-        //Nothing
-        //The Item does not exist
     }
 
-    return returnData;
 };
 
-_Method.addDICEProto = function (hashOfProto, addr, diceProto) {
+_Method.addDICEProto = function (hashOfProto, addr, diceProto, finishCallback) {
     //Create Sql request
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
-    var updateSql = `UPDATE ${this.table} SET ${cDB_Table_Columns.proto.name}="${diceProto}" , ${cDB_Table_Columns.curOwner.name}="${addr}" WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}"`;
     var addNewSql = `INSERT INTO ${this.table} (${cDB_Table_Columns.hash.name},${cDB_Table_Columns.proto.name},${cDB_Table_Columns.curOwner.name}) VALUES ("${hashOfProto}","${diceProto}","${addr}")`;
 
     //Get data
-    var result = this.sqlRequest(dataSql);
-
+    this.connection.query(dataSql, returnData);
+    var connection = this.connection;
+    var instance = this;
+    var addrOp = this.addrOp;
+    
     //Add or Update
-    if (result.toString() === "") {
-        this.sqlRequest(addNewSql);
+    function returnData(err, res, fie) {
+        try {
+            if (res.toString() === "") {
+                connection.query(addNewSql, finishCallback(true));
+            } else {
+                finishCallback(false);
+            }
+        } catch (e) {
+            //If there is no record => no table or DB
+            instance.createDB(addrOp, () => {
+                connection.query(addNewSql, finishCallback(true));
+            });
+        }
     }
 };
-
-_Method.sqlRequest = function (sql) {
-
-    //Send sql request to DB
-    return this.connection.query(sql);
-};
-module.exports = DBWorker_MySql;
+module.exports = DBWorker_MySql_Async;
