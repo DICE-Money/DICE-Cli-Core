@@ -116,7 +116,7 @@ _Method.createDB = function (addrOp, finishCallback) {
                 ${cDB_Table_Columns.proto.name} VARCHAR(512), 
                 ${cDB_Table_Columns.curOwner.name} VARCHAR(40), 
                 ${cDB_Table_Columns.newOwner.name} VARCHAR(40),
-                ${cDB_Table_Columns.modified.name} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`;
+                ${cDB_Table_Columns.modified.name} TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`;
 
         connection.query(sql, finishCallback);
     }
