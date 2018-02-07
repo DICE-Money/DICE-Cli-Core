@@ -26,7 +26,8 @@
 
 //Required libraries
 const modCrypto = require('crypto');
-const modBase58 = require('bs58');
+var modBase58 = require('../Base58/Base58.js');
+modBase58 = new modBase58();
 
 //Local variables
 var _Method = DigitalAdressCalculator.prototype;
