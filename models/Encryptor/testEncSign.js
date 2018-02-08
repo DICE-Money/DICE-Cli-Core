@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2017, Mihail Maldzhanski
+ * Copyright (c) 2018, Mihail Maldzhanski
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,17 +23,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-var crypto = require("crypto");
-var eccrypto = require("eccrypto");
- 
-var privateKeyA = crypto.randomBytes(32);
-var publicKeyA = eccrypto.getPublic(privateKeyA);
 
- 
-// Encrypting the message for A. 
-eccrypto.encrypt(publicKeyA, Buffer("msg to a")).then(function(encrypted) {
-  // A decrypting the message. 
-  eccrypto.decrypt(privateKeyA, encrypted).then(function(plaintext) {
-    console.log("Message to part A:", plaintext.toString());
-  });
-});
+const modEncryptor = require('./Encryptor_Signer.js');
+
+//1. Set Static keys
+var keysMiner = {private:"bae4d414922260ce5390e7e89867a5aa4deae9d9", public:"0259b056e33f3bb7947f54acb6729e613578d38c"};
+var keysOperator = {private:"a3f7e2ada1100f49543e823c4b3bfa7922695e69",public:"03ba8b4532663c10e010832fec4fa6f0e8303fd9"};
+
+//2.1. Create Instance of encryptor (Miner side)
+var enc_M = new modEncryptor(keysMiner);
+
+//2.2. Create Instance of encryptor (Operator side)
+var enc_O = new modEncryptor(keysOperator);
+
+//3. Miner prepare signed and encrypted data to Operator
+//   Miner knows only public key !
+var certificateMiner = enc_M.getKeyExchangeCerificate(keysOperator.public);
+console.log("Miner Certificate:",JSON.stringify(certificateMiner));
+
+//4. Operator receives Certificate and try to accpet it
+//   Operator knows only public key
+var bigCertificate = enc_O.acceptKeyExchangeCertificate(certificateMiner,keysMiner.public);
+console.log("Operator accept certificate:", bigCertificate);
