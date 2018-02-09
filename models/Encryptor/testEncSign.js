@@ -38,7 +38,9 @@ var enc_O = new modEncryptor(keysOperator);
 
 //3. Miner prepare signed and encrypted data to Operator
 //   Miner knows only public key !
+console.time("Prepare Certificate");
 var certificateMiner = enc_M.getKeyExchangeCertificate(keysOperator.public);
+console.timeEnd("Prepare Certificate");
 console.log("Miner Certificate:",JSON.stringify(certificateMiner));
 
 //4. Miner prepare signed and encrypted data to Operator
@@ -48,7 +50,9 @@ console.log("Operator Certificate:",JSON.stringify(certificateOperator));
 
 //5. Operator receives Certificate and try to accpet it
 //   Operator knows only public key
+console.time("Accept Certificate");
 var bigCertificate = enc_O.acceptKeyExchangeCertificate(certificateMiner,keysMiner.public);
+console.timeEnd("Accept Certificate");
 console.log("Operator accept certificate:", bigCertificate);
 
 //6. Operator receives Certificate and try to accpet it
@@ -67,9 +71,13 @@ console.log("Operator decrypt message:",decrypted_O.toString("hex"));
 
 //9. Return reply to miner (Operator)
 testString = "Hello Miner";
+console.time("Encryption");
 var encrypted_O = enc_O.encryptDataPublicKey(testString);
+console.timeEnd("Encryption");
 console.log("Operator encrypt message:",encrypted_O);
 
 //8. Try to decrypt some data with new certificates (Miner)
+console.time("Decryption");
 var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O);
+console.timeEnd("Decryption");
 console.log("Miner decrypt message:",decrypted_M.toString("hex"));
