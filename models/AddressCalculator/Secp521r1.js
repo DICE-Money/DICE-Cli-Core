@@ -34,7 +34,7 @@ var _Method = Secp521k1.prototype;
 function Secp521k1(keyPair) {
     this.keys = 0;
     this.ecSecp521r1 = new modEc('p521');
-    this.cryptoSecp521r1 = modCrypto.createECDH("secp521r1");
+    this.cryptoSecp521r1 = new modCrypto.createECDH("secp521r1");
     
     //Set keys
     this.setKeys(keyPair);
@@ -49,6 +49,10 @@ _Method.getKeyPair = function () {
     return {private:this.keys.getPrivate(),public: pub.toString('hex')};
 };
 
+_Method.getCertificate = function () {
+    return this.cryptoSecp521r1.getPublicKey(null,"compressed").toString('hex');
+};
+
 _Method.genarateKeys = function () {
 
     //Gen keys
@@ -61,7 +65,7 @@ _Method.genarateKeys = function () {
 
 _Method.sign = function(hexString){
     //Sign data
-    var signature = this.keys.sign(hexString);
+    var signature = this.keys.sign(hexString.toString("hex"));
     
     // Export DER encoded signature in Array 
     var derSign = signature.toDER();
@@ -71,8 +75,9 @@ _Method.sign = function(hexString){
 
 _Method.verify = function(hexString, signature, pubKey){
     var pubKeyReal = (pubKey.toString('hex'));
-    var uncompressed =  this.cryptoSecp521r1.setPublicKey(pubKeyReal,"hex").getPublicKey("hex");
-    return this.ecSecp521r1.verify(hexString, signature,uncompressed,"hex");
+    var tempCryptoSecp521r1 = new modCrypto.createECDH("secp521r1");
+    var uncompressed =  tempCryptoSecp521r1.setPublicKey(pubKeyReal,"hex").getPublicKey("hex");
+    return this.ecSecp521r1.verify(hexString.toString('hex'), signature,uncompressed,"hex");
 };
 
 _Method.setKeys = function(keyPair){       
@@ -80,6 +85,14 @@ _Method.setKeys = function(keyPair){
         this.keys = this.ecSecp521r1.keyFromPrivate(keyPair.private);
         this.cryptoSecp521r1.setPrivateKey(keyPair.private.toString('hex'),"hex");
     }
+};
+
+_Method.getCryptoInstance = function(){
+    return this.cryptoSecp521r1;
+};
+
+_Method.computeSecret = function(pubKey){
+    return this.cryptoSecp521r1.computeSecret(pubKey.toString("hex"), "hex");
 };
 
 module.exports = Secp521k1;

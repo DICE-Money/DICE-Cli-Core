@@ -56,7 +56,7 @@ var newdigitalAdressWorker_160k1 = new curve(keys);
 
 //7. Verify with second instance
 var newKeys = newdigitalAdressWorker_160k1.getKeyPair();
-console.log("Verification Instance 2:",newdigitalAdressWorker_160k1.verify(msg,signature,keys.public));
+console.log("Verification Instance 2:",newdigitalAdressWorker_160k1.verify(msg,signature,newKeys.public));
 
 //8. Check with different keys
 var dummydigitalAdressWorker_160k1 = new curve();

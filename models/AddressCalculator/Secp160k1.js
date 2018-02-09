@@ -78,7 +78,7 @@ _Method.genarateKeys = function () {
 
 _Method.sign = function(hexString){
     //Sign data
-    var signature = this.keys.sign(hexString);
+    var signature = this.keys.sign(hexString.toString("hex"));
     
     // Export DER encoded signature in Array 
     var derSign = signature.toDER();
@@ -88,8 +88,9 @@ _Method.sign = function(hexString){
 
 _Method.verify = function(hexString, signature, pubKey){
     var pubKeyReal = (pubKey.toString('hex') + "00");
-    var uncompressed =  this.cryptoSecp160k1.setPublicKey(pubKeyReal,"hex").getPublicKey("hex");
-    return this.ecSecp160k1.verify(hexString, signature,uncompressed,"hex");
+    var tempCryptoSecp160k1 = new modCrypto.createECDH("secp160k1");
+    var uncompressed =  tempCryptoSecp160k1.setPublicKey(pubKeyReal,"hex").getPublicKey("hex");
+    return this.ecSecp160k1.verify(hexString.toString("hex"), signature,uncompressed,"hex");
 };
 
 _Method.setKeys = function(keyPair){       
@@ -97,6 +98,14 @@ _Method.setKeys = function(keyPair){
         this.keys = this.ecSecp160k1.keyFromPrivate(keyPair.private);
         this.cryptoSecp160k1.setPrivateKey(keyPair.private.toString('hex'),"hex");
     }
+};
+
+_Method.getCryptoInstance = function(){
+    return this.cryptoSecp160k1;
+};
+
+_Method.computeSecret = function(pubKey){
+    return this.cryptoSecp160k1.computeSecret((pubKey.toString('hex') + "00"), "hex");
 };
 
 module.exports = Secp160k1;
