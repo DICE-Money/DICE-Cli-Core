@@ -41,12 +41,15 @@ const cIV_LENGTH = 16; // For AES, this is always 16
 function Encryptor(keyPair) {
 
     //Init component with already known keys
-    this._160k1 = new modSecp160k1(keyPair);
+    this._160k1 = new modSecp160k1(_checkForNull(keyPair));
 
     //Create unique key pair for big keys
     this._521r1 = new modSecp521r1();
     this._521r1.genarateKeys();
 
+    //Hold Big Certificate
+    this._certificate = undefined;
+    this._addrCertificateTo = undefined;
 //    this._privateKey = _checkForNull(privateKey);
 //    this._ECDH = modCrypto.createECDH(_checkForNull(curveType));
 //    this._ECDH.setPrivateKey(this._privateKey);
@@ -114,14 +117,57 @@ function _SupportedFormats(data, inputEncoding, outputEncoding) {
 }
 
 //Public Methods
-_Method.encryptDataPublicKey = function (toEncrypt, publicKey) {
-    var sharedKey = this._ECDH.computeSecret(publicKey.slice(0, publicKey.length - this._checkSumSize));
-    return _Encrypt(toEncrypt, _SHA256(sharedKey), null, null);
+_Method.encryptDataPublicKey = function (toEncrypt, publicKey) { 
+    
+    //Check for existing certificate
+    if (this._certificate !== undefined & publicKey === undefined){
+        publicKey = this._certificate;
+    }
+    
+    //1. Prepare secret
+    var sharedKey = this._521r1.computeSecret(publicKey);
+    
+    //2. Sign with small key
+    var smallSignature = this._160k1.sign(toEncrypt);
+    
+    //3. Sign data and signature with big key
+    var dataAndSmallSignature= {data: toEncrypt, sign: smallSignature};
+    var dataAndBigSignature = this._521r1.sign(JSON.stringify(dataAndSmallSignature));
+    
+    //4. Return encetypted data with two signatures
+    return _Encrypt(JSON.stringify({data:dataAndSmallSignature,sign:dataAndBigSignature}), _SHA256(sharedKey), null, null);
 };
 
 _Method.decryptDataPublicKey = function (toDecrypt, publicKey) {
-    var sharedKey = this._ECDH.computeSecret(publicKey.slice(0, publicKey.length - this._checkSumSize));
-    return _Decrypt(toDecrypt, _SHA256(sharedKey), null, null);
+    
+    var decryptedAndVerifiedData = undefined;
+    
+    //Check for existing certificate
+    if (this._certificate !== undefined & publicKey === undefined){
+        publicKey = this._certificate;
+    }
+    
+    //1. Prepare secret 
+    var sharedKey = this._521r1.computeSecret(publicKey);
+
+    //2. Decrypt data and parse it to object
+    var decryptedData = JSON.parse(_Decrypt(toDecrypt, _SHA256(sharedKey), null, null));
+    
+    //3. Verify is signed with private key of publicKey (Big)
+    if (false !== this._521r1.verify(JSON.stringify(decryptedData.data), decryptedData.sign, publicKey)) {
+
+        //4. Verify is signed with private key of publicKey (Big)
+        if (false !== this._160k1.verify(decryptedData.data.data, decryptedData.data.sign, this._addrCertificateTo)) {
+            decryptedAndVerifiedData = decryptedData.data.data;
+        } else {
+            console.log("2. Data is not signed witn private key of 160k1 curve");
+        }
+    } else {
+        console.log("1. Data is not signed witn private key of 521r1 curve");
+    }
+    
+    //5. Return decrypted data
+    return decryptedAndVerifiedData;
 };
 
 _Method.setPrivateKey = function (keyPair) {
@@ -129,9 +175,9 @@ _Method.setPrivateKey = function (keyPair) {
     this._160k1 = new modSecp160k1(keyPair);
 };
 
-_Method.getKeyExchangeCerificate = function (publicKey) {
+_Method.getKeyExchangeCertificate = function (publicKey) {
     //1. Prepare sectret
-    var sharedKey = this._160k1.getCryptoInstance().computeSecret(publicKey.toString("hex") + "00", "hex");
+    var sharedKey = this._160k1.computeSecret(publicKey);
 
     //2. Prepare certificate and sign it with small key
     var bigCertificate = this._521r1.getCertificate();
@@ -150,11 +196,8 @@ _Method.getKeyExchangeCerificate = function (publicKey) {
 };
 
 _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
-    // By default certificate is invalid
-    var bigCertificate = null;
-
     //1. Prepare sectret
-    var sharedKey = this._160k1.getCryptoInstance().computeSecret(publicKey.toString("hex") + "00", "hex");
+    var sharedKey = this._160k1.computeSecret(publicKey);
 
     //2. Decrypt data
     var decryptedData = JSON.parse(_Decrypt(signedCertificate, _SHA256(sharedKey), null, null));
@@ -167,7 +210,8 @@ _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
 
             //5. Verify is signed with private key of publicKey (Small)
             if (false !== this._160k1.verify(decryptedData.cert.cert.cert, decryptedData.cert.cert.sign, publicKey)) {
-                bigCertificate = decryptedData.cert.cert.cert;
+                this._certificate = decryptedData.cert.cert.cert;
+                this._addrCertificateTo = publicKey;
             } else {
                 console.log("3. Data is not signed witn private key of 160k1 curve");
             }
@@ -178,7 +222,7 @@ _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
         console.log("1. Data is not signed witn private key of 160k1 curve");
     }
 
-    return bigCertificate;
+    return this._certificate;
 };
 
 module.exports = Encryptor;

@@ -38,10 +38,38 @@ var enc_O = new modEncryptor(keysOperator);
 
 //3. Miner prepare signed and encrypted data to Operator
 //   Miner knows only public key !
-var certificateMiner = enc_M.getKeyExchangeCerificate(keysOperator.public);
+var certificateMiner = enc_M.getKeyExchangeCertificate(keysOperator.public);
 console.log("Miner Certificate:",JSON.stringify(certificateMiner));
 
-//4. Operator receives Certificate and try to accpet it
+//4. Miner prepare signed and encrypted data to Operator
+//   Miner knows only public key !
+var certificateOperator = enc_O.getKeyExchangeCertificate(keysMiner.public);
+console.log("Operator Certificate:",JSON.stringify(certificateOperator));
+
+//5. Operator receives Certificate and try to accpet it
 //   Operator knows only public key
 var bigCertificate = enc_O.acceptKeyExchangeCertificate(certificateMiner,keysMiner.public);
 console.log("Operator accept certificate:", bigCertificate);
+
+//6. Operator receives Certificate and try to accpet it
+//   Operator knows only public key
+var bigCertificate = enc_M.acceptKeyExchangeCertificate(certificateOperator,keysOperator.public);
+console.log("Miner accept certificate:", bigCertificate);
+
+//7. Try to encrypt some data with new certificates (Miner)
+var testString = "Hello Operator";
+var encrypted_M = enc_M.encryptDataPublicKey(testString);
+console.log("Miner encrypt message:",encrypted_M);
+
+//8. Try to decrypt some data with new certificates (Operator)
+var decrypted_O = enc_O.decryptDataPublicKey(encrypted_M);
+console.log("Operator decrypt message:",decrypted_O.toString("hex"));
+
+//9. Return reply to miner (Operator)
+testString = "Hello Miner";
+var encrypted_O = enc_O.encryptDataPublicKey(testString);
+console.log("Operator encrypt message:",encrypted_O);
+
+//8. Try to decrypt some data with new certificates (Miner)
+var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O);
+console.log("Miner decrypt message:",decrypted_M.toString("hex"));
