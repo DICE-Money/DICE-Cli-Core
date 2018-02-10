@@ -62,22 +62,22 @@ console.log("Miner accept certificate:", bigCertificate);
 
 //7. Try to encrypt some data with new certificates (Miner)
 var testString = "Hello Operator";
-var encrypted_M = enc_M.encryptDataPublicKey(testString);
+var encrypted_M = enc_M.encryptDataPublicKey(testString,keysOperator.public);
 console.log("Miner encrypt message:",encrypted_M);
 
 //8. Try to decrypt some data with new certificates (Operator)
-var decrypted_O = enc_O.decryptDataPublicKey(encrypted_M);
+var decrypted_O = enc_O.decryptDataPublicKey(encrypted_M,keysMiner.public);
 console.log("Operator decrypt message:",decrypted_O.toString("hex"));
 
 //9. Return reply to miner (Operator)
 testString = "Hello Miner";
 console.time("Encryption");
-var encrypted_O = enc_O.encryptDataPublicKey(testString);
+var encrypted_O = enc_O.encryptDataPublicKey(testString,keysMiner.public);
 console.timeEnd("Encryption");
 console.log("Operator encrypt message:",encrypted_O);
 
 //8. Try to decrypt some data with new certificates (Miner)
 console.time("Decryption");
-var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O);
+var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O,keysOperator.public);
 console.timeEnd("Decryption");
 console.log("Miner decrypt message:",decrypted_M.toString("hex"));
