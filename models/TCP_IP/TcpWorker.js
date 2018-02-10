@@ -85,7 +85,7 @@ function sliceDataByAddr(data) {
     return data;
 }
 
-function dataCallbacks(tcpWorker, buffer, commands, view) {
+function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback) {
     if (tcpWorker.type === 'client') {
         tcpWorker.instance.on('data', function (data) {
             try {
@@ -116,6 +116,11 @@ function dataCallbacks(tcpWorker, buffer, commands, view) {
                             view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
                             c.write(JSON.stringify(buf));
                         });
+
+                        //Invoke on close
+                        c.on('close', function () {
+                            onClientCloseCallback(addr);
+                        });
                     }
                 } catch (e) {
                     buf[addr] = {data: view.getTextByCode("ERROR", "Err0003")};
@@ -131,7 +136,7 @@ function dataCallbacks(tcpWorker, buffer, commands, view) {
     }
 }
 //Public
-_Method.create = function (serverOrClient, ip, port, commandsOrCallback, view) {
+_Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, onClientCloseCallback) {
     if ("server" === serverOrClient) {
         this.worker.type = 'server';
         this.worker.instance = createServer(ip, port);
@@ -157,7 +162,7 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view) {
     generalCallbacks(this.worker.instance, this.errorCallback, view);
 
     //data managment callbacks
-    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view);
+    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback);
 };
 
 

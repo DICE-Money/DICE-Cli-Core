@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A0645E14-6364-743B-380E-471CC8132A9D}</ProjectGuid>
+    <ProjectGuid>{491720D0-0277-0F93-A010-65E866E8C513}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>sha3_C_Addon</RootNamespace>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>

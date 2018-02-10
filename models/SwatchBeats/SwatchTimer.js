@@ -18,7 +18,7 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETH"January 01, 2001 00:00:00 GMT+0100"ER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
@@ -35,6 +35,8 @@ var _Method = SwatchTimer.prototype;
 function SwatchTimer() {
     // always initialize all instance properties
     this._currentDate = new Date();
+    this.scheduler = undefined;
+    this.beats = undefined;
 }
 
 function _CalculateCurrentBeats() {
@@ -95,6 +97,29 @@ _Method.getBeatsPer = function (time) {
     }
 
     return beatsPerL;
+};
+
+_Method.BeatsAsync = function (command) {
+    switch (command) {
+        case 'start':
+            //Set present value
+            this.beats = _CalculateCurrentBeats();
+            
+            //Update on 1 second
+            this.scheduler = setInterval(() => {
+                this.beats = _CalculateCurrentBeats();
+            }, 1000);
+            break;
+        case 'stop':
+            clearInterval(this.scheduler);
+            break;
+        case 'get':
+            return this.beats;
+            break;
+        default:
+            //Nothing 
+            break;
+    }
 };
 
 // export the class

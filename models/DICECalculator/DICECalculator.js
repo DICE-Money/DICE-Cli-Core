@@ -48,11 +48,15 @@ var _Method = DICECalculator.prototype;
 
 /**
  * General Use constructor of DICE Calcululator.
- *
- * @public
+ * @author Mihail Maldzhanski <pollarize@gmail.com>
+ * @example
+ * const modDICECalculator = require('<path>/DICECalculator.js'); 
+ * var DICECalc = new DICECalculator("js");
+ * var DICEUnit = DICECalc.getValidDICE_CUDA(addrOp, addrMin, zeroes, pathToCuda, "cudaJsUnit.json");
+ * @constructor
  * @param {String} shaType - "c" or "js"
  * if it's not defined JS will be used by default
- * @return None
+ * @return {DICECalculator} instance
  */
 function DICECalculator(shaType) {
     // always initialize all instance properties
@@ -72,7 +76,9 @@ function DICECalculator(shaType) {
 /**
  * Print a simple message to console.
  * Demonstrate the instance is alive.
- * @public
+ * @memberOf DICECalculator
+ * @function
+ * @name Alive
  * @param None
  * @return None
  */
@@ -84,7 +90,9 @@ _Method.Alive = function () {
 /**
  * Invoke calculation of new DICE Unit.
  * Contains a busy loop.
- * @public
+ * @memberOf DICECalculator
+ * @function
+ * @name getValidDICE
  * @param {String} addrOp - Digital Address of Operator
  * @param {String} addrMin - Digital Address of Miner
  * @param {Integer} validZeroes - Minimum required zeroes in hash of prototype
@@ -97,7 +105,9 @@ _Method.getValidDICE = function (addrOp, addrMin, validZeroes) {
 /**
  * Invoke calculation of new DICE Unit.
  * Contains a busy loop.
- * @public
+ * @function
+ * @memberOf DICECalculator
+ * @name getValidDICE_CUDA
  * @param {String} addrOp - Digital Address of Operator
  * @param {String} addrMin - Digital Address of Miner
  * @param {Integer} validZeroes - Minimum required zeroes in hash of prototype
@@ -111,8 +121,9 @@ _Method.getValidDICE_CUDA = function (addrOp, addrMin, validZeros, cudaAppPath, 
 
 /**
  * Calculate SHA3 of Unit.
- *
- * @public
+ * @function
+ * @memberOf DICECalculator
+ * @name getSHA3OfUnit
  * @param {DICEUnit} Dice - Calculated DICE unit.
  * @return {Buffer} SHA3 of DICE Unit 
  */
@@ -122,8 +133,9 @@ _Method.getSHA3OfUnit = function (DICEUnit) {
 
 /**
  * Calculate SHA3 of Prototype.
- *
- * @public
+ * @function
+ * @memberOf DICECalculator
+ * @name getSHA3OfProtoType
  * @param {DICEPrototype} Dice - Calculated DICE Prototype.
  * @return {Buffer} SHA3 of DICE Prototype. 
  */
@@ -133,8 +145,9 @@ _Method.getSHA3OfProtoType = function (DICEProto) {
 
 /**
  * Calculate SHA3 of Prototype.
- *
- * @public
+ * @function
+ * @memberOf DICECalculator
+ * @name getHexLookingTable
  * @param {Number} countOfZeroes - count of valid zeroes looking for.
  * @return {Array} Valid chars which must to be checked during validation of zeroes. 
  */
@@ -144,10 +157,10 @@ _Method.getHexLookingTable = function (countOfZeroes) {
 
 /**
  * Calculate SHA3-512.
- *
- * @public 
- * @param {String} buffer, {Buffer} buffer
- * @param {Module} sha3 - isntance of module which will be used to calculate SHA3 of input data.
+ * @function
+ * @memberOf DICECalculator
+ * @name CalculateSHA3_512
+ * @param {String} buffer @or {Buffer} buffer
  * @return {String} data in hex.
  */
 _Method.CalculateSHA3_512 = function (buffer) {
@@ -156,8 +169,9 @@ _Method.CalculateSHA3_512 = function (buffer) {
 
 /**
  * Get SHA3 counter
- *
- * @public 
+ * @function
+ * @memberOf DICECalculator
+ * @name getSHA3Count
  * @param None
  * @return {Integer} count of how many times SHA3 was invoked
  */
@@ -179,8 +193,9 @@ function _CalculatePayload(DICEUnit) {
 
 /**
  * Calculate SHA3-512.
- *
- * @private 
+ * @function
+ * @private
+ * @name _CalculateSHA3_512
  * @param {String} buffer, {Buffer} buffer
  * @param {Module} sha3 - instance of module which will be used to calculate SHA3 of input data.
  * @param {Integer} counter - increment the counter when function called.
@@ -345,5 +360,6 @@ function _byteToHex(b) {
 
     return hexValue;
 }
+
 // export the class
 module.exports = DICECalculator;

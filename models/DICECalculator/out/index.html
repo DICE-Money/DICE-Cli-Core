@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>General Revision History</h1><pre class="prettyprint source"><code>Revision 1.21 Command Arguments - 08.01.2018
+- Add abstraction for Command Arguments (CommandParser model)
+- Add '--help' command for both applications
+- Refactoring of applications to use build configuration files
+- Add returning value in &quot;validation&quot;
+- Add checking for mismatch in registration of new DICE Unit
+- Add '-r, --registration' command for separated registration of DICE Unit
+- Add &quot;dnsBinder&quot; path in configuration file for operator application
+- Add &quot;-ver, --version&quot; command to inform for current version of applications
+- Change return value from operator as Code instead Text
+
+Revision 1.20 CUDA Optimization - 31.12.2017
+- Implement CUDA Application Revision 1.00
+- Use JS SHA3 library instead C Library.
+- Update C Library to use raw bytes instead HEX
+- Add VIEW_Console model
+- Add VIEW_Console code table and port table
+- Add Excel for generation of code table
+- Integration Optimization for separated builds for Win/Mac/Linux (x86 and x64)
+
+Revision 1.11 Trading Ownerless - 14.12.2017
+- Included Trading support for ownerless DICE Units
+- Add support of user defined value for mining a new DICE Unit
+- Update execute.bat file with new commands
+- Bug Fixes 
+    - Console messages
+
+Revision 1.1 Trading - 10.12.2017
+- Included Trading support
+- Configuration of Server with file
+- Bug Fixes 
+    - Miner and Server communication
+    - Refactoring of some components
+    - Support of SHA3-C library in Standalone applications
+
+
+
+Revision 1.0 Initial - 06.12.2017
+- Generation of Key pair Digital Address 
+- Communication over TCP between Miner and Server 
+- Encrypted data with Digital addresses 
+- Generation of new DICE Units 
+- Swatch Time calculation 
+- SHA 3 on C for NodeJS (still need some improvement for standalone building) 
+- Encoding to Base 58 
+- Valuiation of units by Server and locally 
+- Registration of DICE unit in its DB 
+- DNS binder for translation of Digital Address to Ip Port communication to Server 
+- Standalone applications for Server and Miner</code></pre><h1>How to Use</h1><pre class="prettyprint source"><code>1. Example use of Miner Application 
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;output file for Unit> &lt;address Of Operator>
+Miner.exe -cc miner.json unit.txt 3SEdktQGS4K947PUadvbHFD2oJ
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;output file for Unit> &lt;address Of Operator>
+Miner.exe -c miner.json unit.txt 3SEdktQGS4K947PUadvbHFD2oJG
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;output file for Unit> &lt;address Of Operator> &lt;DICE Value>
+Miner.exe -c miner.json unit.txt 3SEdktQGS4K947PUadvbHFD2oJG 2
+
+-Aplication-  -&lt;command> &lt;dice Unit in Base 58>
+Miner.exe -v unit.txt
+
+-Aplication-  -&lt;command> &lt;keyPair filename>
+Miner.exe -k keyPair.json
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Dice Unit file> &lt;output file for Encrypted Unit> &lt;address Of New Owner> &lt;address Of Operator>
+Miner.exe -tc miner.json ./out/unitTest.txt ./out/unitEncToM2.txt 2dnzkaaKeeCeUAXTy2DrxijSKGB 3SEdktQGS4K947PUadvbHFD2oJG
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Dice Unit file> &lt;output file for Encrypted Unit> &lt;address Of New Owner> &lt;address Of Operator>
+Miner.exe -to miner.json ./out/unitTest.txt 3SEdktQGS4K947PUadvbHFD2oJG
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Encrypted Dice Unit file> &lt;address Of Operator>
+Miner.exe -tn miner2.json ./out/unitEncToM2.txt 3SEdktQGS4K947PUadvbHFD2oJG
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Encrypted Dice Unit file> &lt;address Of Operator>
+Miner.exe -tn miner2.json ./out/unitEncToM2.txt 3SEdktQGS4K947PUadvbHFD2oJG
+
+2. Example use of Server Application 
+-Aplication-  -&lt;keyPair filename> &lt;valid zeros> &lt;k> &lt;N>
+Server.exe operator.json 15 1 25
+
+-Aplication-  -config &lt;configFile>
+Server.exe -config serverConfig.json
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Encrypted Dice Unit file> &lt;address Of Operator>
+Miner.exe -tn miner2.json ./out/unitEncToM2.txt 3SEdktQGS4K947PUadvbHFD2oJG
+
+-Aplication-  -&lt;command> &lt;keyPair filename> &lt;Encrypted Dice Unit file> &lt;address Of Operator>
+Miner.exe -tn miner2.json ./out/unitEncToM2.txt 3SEdktQGS4K947PUadvbHFD2oJG</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DICECalculator.html">DICECalculator</a></li><li><a href="DICEPrototype.html">DICEPrototype</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 13 2018 12:42:16 GMT+0200 (FLE Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

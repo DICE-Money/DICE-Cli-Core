@@ -31,10 +31,10 @@ const modDICECalculator = require('../DICECalculator/DICECalculator.js');
 
 //1. Create an empty DICE unit
 var DICE = new modDICEUnit();
-var DICECalc = new modDICECalculator();
+var DICECalc = new modDICECalculator("js");
 
 //2. Read data for Valid DICE Unit from file
-file = modFs.readFileSync('../../diceUnit.json', "utf8");
+file = modFs.readFileSync('./unitTestCUDA.json', "utf8");
 DICE = DICE.from(file);
 
 //3. Create a new instance of the Value 

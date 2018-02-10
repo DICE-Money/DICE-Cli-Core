@@ -45,3 +45,5 @@ var realTime = timer.beatsToDate(u32Arr[0]);
 //5. Print time to Console
 console.log(u32Arr[0]);
 console.log(realTime);
+
+console.log(new Date("January 01, 2001 00:00:00 GMT+0100").getTime());

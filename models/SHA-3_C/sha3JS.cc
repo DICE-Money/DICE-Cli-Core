@@ -2,7 +2,7 @@
 #include <node.h>
 #include "sha3.cc"
 
-//Local macroses
+//Local macros 
 #define cByteSize       ((uint8_t)8)
 #define cSHASize        ((uint16_t)512)
 #define cStringArrayMax ((uint16_t)1024)
@@ -10,12 +10,13 @@
 
 //Local variables
 static char aCharArrayL[cStringArrayMax]; 
-
+static uint8_t aByteArrayL[cStringArrayMax]; 
 
 //Local function Prototypes
 static const uint8_t* CalculateSHA3 (const char * pU8ArrayP, uint8_t u8SizeP);
 static uint8_t* StringToHex(uint8_t* pCharArrayP, uint8_t u8CountOfBytesP);
-
+static void hexstr_to_char(uint8_t* hexstr, uint8_t* bufOut, uint8_t size);
+ 
 namespace sha3 {
 
 using v8::Exception;
@@ -53,7 +54,7 @@ void sha3_512_JS(const FunctionCallbackInfo<Value>& args) {
     const char* bufArray = *str;
     const uint8_t* hashHex;
     
-    hashHex = CalculateSHA3(bufArray, str.length());
+    hashHex = CalculateSHA3(bufArray, str.length()/2);
     
     args.GetReturnValue().Set(String::NewFromUtf8(isolate, (char*)hashHex));
 }
@@ -71,9 +72,11 @@ static const uint8_t* CalculateSHA3 (const char * pCharArrayP, uint8_t u8SizeP)
     sha3_context c;
     uint8_t* pU8HashL;
     
+    hexstr_to_char((uint8_t*)pCharArrayP,aByteArrayL,u8SizeP);
+    
     //Apply SHA3
     sha3_Init512(&c);
-    sha3_Update(&c, pCharArrayP, u8SizeP);
+    sha3_Update(&c, aByteArrayL, u8SizeP);
     pU8HashL = (uint8_t*) sha3_Finalize(&c);
 
     pU8HashL = StringToHex(pU8HashL, cSHASize/cByteSize);
@@ -93,3 +96,12 @@ static uint8_t* StringToHex(uint8_t* pCharArrayP, uint8_t u8CountOfBytesP)
    
     return (uint8_t*) aCharArrayL;
 }
+
+ static void hexstr_to_char(uint8_t* hexstr, uint8_t* bufOut, uint8_t size)
+{
+	for (size_t i = 0, j = 0; j < size; i += 2, j++)
+	{
+		bufOut[j] = (hexstr[i] % 32 + 9) % 25 * 16 + (hexstr[i + 1] % 32 + 9) % 25;
+	}
+}
+

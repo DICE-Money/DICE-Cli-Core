@@ -30,6 +30,19 @@ modBase58 = new modBase58();
 
 var _Method = DICEPrototype.prototype;
 
+/**
+ * General Use constructor of DICE Prototype.
+ * @author Mihail Maldzhanski <pollarize@gmail.com>
+ * @example
+ * const modDICECalculator = require('<path>/DICEPrototype.js'); 
+ * var DICEProto = new DICEPrototype();
+ * var DICEUnit = DICECalc.getValidDICE_CUDA(addrOp, addrMin, zeroes, pathToCuda, "cudaJsUnit.json");
+ * DICEProto.fromDICEUnit(DICEUnit);
+ * var sha3Payload = DICECalc.CalculateSHA3_512(Buffer.from(DICEUnit.payload,buffer));
+ * DICEProto.setSHA3PayLoad(sha3Payload);
+ * @constructor
+ * @return {DICEPrototype} instance
+ */
 function DICEPrototype() {
     //1024bit or 128 byte Dice raw prototype
     this.addrOperator = new Uint8Array(20);
@@ -39,6 +52,14 @@ function DICEPrototype() {
     this.SHA3PayLoad = new Uint8Array(64);
 }
 
+/**
+ * Set data drom DICEUnit
+ * @memberOf DICEPrototype
+ * @function
+ * @name fromDICEUnit - Already calculated DICE Unit
+ * @param {DICEUnit} diceUnit
+ * @return {None}
+ */
 _Method.fromDICEUnit = function (diceUnit) {
     this.addrOperator = diceUnit.addrOperator;
     this.addrMiner = diceUnit.addrMiner;

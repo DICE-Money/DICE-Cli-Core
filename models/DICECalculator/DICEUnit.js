@@ -36,7 +36,6 @@ const cBitCoinAdressVersion = 1;
 const cBitCoinAdressCheckSum = 4;
 
 function DICEUnit() {
-
     //1024bit or 128 byte Dice raw prototype
     this.addrOperator = new Uint8Array(20);
     this.addrMiner = new Uint8Array(20);
@@ -59,7 +58,6 @@ _Method.setOperatorAdress = function (string, base58) {
         this.addrOperator = _stringToUint8Array(string, this.addrOperator.length);
     } else {
         this.addrOperator = _bs58AddrToRaw(string);
-        console.log();
     }
 };
 
