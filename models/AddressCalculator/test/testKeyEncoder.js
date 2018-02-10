@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2017, Mihail Maldzhanski
+ * Copyright (c) 2018, Mihail Maldzhanski
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,44 +23,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-const modDigAddr = require('./DigitalAdressCalculator_ECDH.js');
-const modBS58 = require('bs58');
-
-var addrWorker = new modDigAddr();
-
-addrWorker.CalculateKeyAdressPair();
-
-console.log("Base 58 Key:  ",addrWorker.getPrivateKey('bs58'));
-console.log("Base 58 Addr: ",addrWorker.getDigitalAdress('bs58'));
-
-console.log("Orginal Key:  ",addrWorker.getPrivateKey('hex'));
-console.log("Orginal Addr: ",addrWorker.getDigitalAdress('hex'));
-
-console.log("Decoded Key:  ",modBS58.decode(addrWorker.getPrivateKey('bs58')).toString('hex'));
-console.log("Decoded Addr: ",modBS58.decode(addrWorker.getDigitalAdress('bs58')).toString('hex'));
-
-var counter = 1;
-console.log("Starting");
-
-function testLenght(){
-    addrWorker.CalculateKeyAdressPair();
-    var len = addrWorker.getDigitalAdress('').length;
-    if (len !== 20){
-        throw "Breaking the logic";
-    }
+var KeyEncoder = require('key-encoder');
+//    keyEncoder = new KeyEncoder('secp256k1')
     
-    if (counter <= 1000000)
-    {
-        console.log(counter++);
-        console.log(addrWorker.getDigitalAdress('hex'));
-    }
-    else
-    {
-        throw "Checked 1 000 000 Times";
-    }
-}
+var EC = require('elliptic').ec;
+var encoderOptions = {
+    privatePEMOptions: {label: 'EC PRIVATE KEY'},
+    publicPEMOptions: {label: 'PUBLIC KEY'},
+    curve: new EC('secp256k1')
+};
+var keyEncoder = new KeyEncoder(encoderOptions);
 
-while(true){
-//    testLenght();
-}
+var rawPrivateKey = '844055cca13efd78ce79a4c3a4c5aba5db0ebeb7ae9d56906c03d333c5668d5b',
+    rawPublicKey = '04147b79e9e1dd3324ceea115ff4037b6c877c73777131418bfb2b713effd0f502327b923861581bd5535eeae006765269f404f5f5c52214e9721b04aa7d040a75'
+    
+var pemPrivateKey = keyEncoder.encodePrivate(rawPrivateKey, 'raw', 'pem')
+
+console.log(pemPrivateKey);

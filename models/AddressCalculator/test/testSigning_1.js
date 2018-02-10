@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2017, Mihail Maldzhanski
+ * Copyright (c) 2018, Mihail Maldzhanski
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,43 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-const modDigAddr = require('./DigitalAdressCalculator_ECDH.js');
-const modBS58 = require('bs58');
+const crypto = require('crypto');
+const fs = require('fs');
+const sign = crypto.createSign('SHA256');
+const verify = crypto.createSign('SHA256');
 
-var addrWorker = new modDigAddr();
+cECDH = crypto.createECDH("secp256k1");
 
-addrWorker.CalculateKeyAdressPair();
 
-console.log("Base 58 Key:  ",addrWorker.getPrivateKey('bs58'));
-console.log("Base 58 Addr: ",addrWorker.getDigitalAdress('bs58'));
-
-console.log("Orginal Key:  ",addrWorker.getPrivateKey('hex'));
-console.log("Orginal Addr: ",addrWorker.getDigitalAdress('hex'));
-
-console.log("Decoded Key:  ",modBS58.decode(addrWorker.getPrivateKey('bs58')).toString('hex'));
-console.log("Decoded Addr: ",modBS58.decode(addrWorker.getDigitalAdress('bs58')).toString('hex'));
-
-var counter = 1;
-console.log("Starting");
-
-function testLenght(){
-    addrWorker.CalculateKeyAdressPair();
-    var len = addrWorker.getDigitalAdress('').length;
-    if (len !== 20){
-        throw "Breaking the logic";
-    }
+for (var i = 0; i < 1000; i++){
     
-    if (counter <= 1000000)
-    {
-        console.log(counter++);
-        console.log(addrWorker.getDigitalAdress('hex'));
-    }
-    else
-    {
-        throw "Checked 1 000 000 Times";
-    }
+    console.log(cECDH.getPublicKey("hex","compressed"));
 }
+//const dataToSign = 'some data to sign';
+//
+//sign.write(dataToSign);
+//sign.end();
+//
+//var privateKeyEC = cECDH.getPrivateKey().toString('base64');
+//var privateKey1 = privateKeyEC.slice(0,54);
+//var privateKey2 = privateKeyEC.slice(54);
+//console.log(privateKeyEC, privateKeyEC.length );
+//const privateKey = `-----BEGIN EC PRIVATE KEY-----
+//MFMCAQEEFQ${privateKeyEC}
+//-----END EC PRIVATE KEY-----`;
+//const signOfData = sign.sign(privateKey, 'hex');
+//console.log(privateKey);
+//
+//console.log(Buffer.from(`MFICAQEEFEXwraAoMCn3cK3f/C/VG61mgG0hoAcGBSuBBAACoS4DLAAEBqx10kRh
+//dNxUT54ttw99EK9h2ofwAuvVsnFKRKurzal73nOIZWm82VK3`).toString('hex'));
 
-while(true){
-//    testLenght();
-}
+//------------end signing------------------
+
+//----------Verifying----------------------
+//
+//verify.write(dataToSign);
+//verify.end();
+//
+//const publicKey = cECDH.getPublicKey("hex","compressed");
+//const signature = signOfData;
+//console.log(sign.verify(privateKey, signature));

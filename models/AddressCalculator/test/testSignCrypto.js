@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2017, Mihail Maldzhanski
+ * Copyright (c) 2018, Mihail Maldzhanski
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,44 +23,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+const crypto = require('crypto');
+const sign = crypto.createSign('SHA256');
 
-const modDigAddr = require('./DigitalAdressCalculator_ECDH.js');
-const modBS58 = require('bs58');
+cECDH = crypto.createECDH("secp256k1");
+cECDH.generateKeys();
 
-var addrWorker = new modDigAddr();
+sign.write('some data to sign');
+sign.end();
 
-addrWorker.CalculateKeyAdressPair();
+const privateKey = cECDH.getPrivateKey('hex');
+console.log(sign.sign(privateKey, 'hex'));
 
-console.log("Base 58 Key:  ",addrWorker.getPrivateKey('bs58'));
-console.log("Base 58 Addr: ",addrWorker.getDigitalAdress('bs58'));
-
-console.log("Orginal Key:  ",addrWorker.getPrivateKey('hex'));
-console.log("Orginal Addr: ",addrWorker.getDigitalAdress('hex'));
-
-console.log("Decoded Key:  ",modBS58.decode(addrWorker.getPrivateKey('bs58')).toString('hex'));
-console.log("Decoded Addr: ",modBS58.decode(addrWorker.getDigitalAdress('bs58')).toString('hex'));
-
-var counter = 1;
-console.log("Starting");
-
-function testLenght(){
-    addrWorker.CalculateKeyAdressPair();
-    var len = addrWorker.getDigitalAdress('').length;
-    if (len !== 20){
-        throw "Breaking the logic";
-    }
-    
-    if (counter <= 1000000)
-    {
-        console.log(counter++);
-        console.log(addrWorker.getDigitalAdress('hex'));
-    }
-    else
-    {
-        throw "Checked 1 000 000 Times";
-    }
-}
-
-while(true){
-//    testLenght();
-}

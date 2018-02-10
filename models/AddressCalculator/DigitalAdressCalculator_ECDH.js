@@ -26,6 +26,7 @@
 
 //Required libraries
 const modCrypto = require('crypto');
+const modSecp160k1 = require('./Secp160k1.js');
 var modBase58 = require('../Base58/Base58.js');
 modBase58 = new modBase58();
 
@@ -41,14 +42,10 @@ function DigitalAdressCalculator() {
     // always initialize all instance properties
     this.privateKey = "NOK";
     this.digitalAdress = "NOK";
+    this.ecSecp160k1 = new modSecp160k1();
 }
 
 //Local functions
-function _CalculatePrivateKey() {
-    return cECDH.getPrivateKey('hex');
-}
-
-
 function _SHA256(text) {
     var hash = modCrypto.
             createHash('sha256').
@@ -58,35 +55,21 @@ function _SHA256(text) {
     return hash;
 }
 
-function _CalculateDigitalAdress() {
-    var pubKey = cECDH.getPublicKey('hex', 'compressed');
-
-    var firstSHA = _SHA256(pubKey);
-
-    var doubleSHA = _SHA256(firstSHA);
-
-    var addressChecksum = doubleSHA.substr(0, 4);
-
-    var unEncodedAddress = pubKey + addressChecksum;
-
-    return unEncodedAddress;
-}
-
 //Public methods
-
 //Calcualte Pairs of Private Key And Public Adress
 _Method.CalculateKeyAdressPair = function () {
-    cECDH.generateKeys();
+    //Get KeyPair
+    this.ecSecp160k1.genarateKeys();
+    var keyPair = this.ecSecp160k1.getKeyPair();
 
-    //GenerateRaw
-    this.privateKey = _CalculatePrivateKey();
-    this.digitalAdress = _CalculateDigitalAdress();
+    //Save them to local vars
+    this.privateKey = keyPair.private.toString('hex');
+    this.digitalAdress = keyPair.public.toString('hex');
 };
 
 //Export Get methods
 _Method.getPrivateKey = function (format) {
     var privateKey = new Buffer.from(this.privateKey, 'hex');
-
     if (format === 'bs58') {
         privateKey = modBase58.encode(privateKey);
     } else if (format === 'hex') {
@@ -112,9 +95,6 @@ _Method.getDigitalAdress = function (format) {
     return digitalAddr;
 };
 
-_Method.getCurveType = function(){
-  return cCurveECDH;
-};
 
 // export the class
 module.exports = DigitalAdressCalculator;

@@ -23,44 +23,69 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-const modDigAddr = require('./DigitalAdressCalculator_ECDH.js');
+const modCrypto = require('crypto');
 const modBS58 = require('bs58');
+const lzw = require("node-lzw");
+var zlib = require('zlib');
 
-var addrWorker = new modDigAddr();
-
-addrWorker.CalculateKeyAdressPair();
-
-console.log("Base 58 Key:  ",addrWorker.getPrivateKey('bs58'));
-console.log("Base 58 Addr: ",addrWorker.getDigitalAdress('bs58'));
-
-console.log("Orginal Key:  ",addrWorker.getPrivateKey('hex'));
-console.log("Orginal Addr: ",addrWorker.getDigitalAdress('hex'));
-
-console.log("Decoded Key:  ",modBS58.decode(addrWorker.getPrivateKey('bs58')).toString('hex'));
-console.log("Decoded Addr: ",modBS58.decode(addrWorker.getDigitalAdress('bs58')).toString('hex'));
-
-var counter = 1;
-console.log("Starting");
-
-function testLenght(){
-    addrWorker.CalculateKeyAdressPair();
-    var len = addrWorker.getDigitalAdress('').length;
-    if (len !== 20){
-        throw "Breaking the logic";
+console.log("Start");
+var curves = modCrypto.getCurves();
+//for (var i = 0; curves.length; i++)
+//{
+//    try{
+var addresses = {};
+var data = [];
+function getAddres(i) {
+    var isInvalid = true;
+    var invalidTries = 0;
+    
+    while (isInvalid) {
+        cECDH = modCrypto.createECDH("secp521r1");
+        cECDH.generateKeys();
+        var pubKey = cECDH.getPublicKey(null,"compressed");
+        //console.log(pubKey[0],pubKey[1]);
+    //    if (pubKey[0]=== 1 && pubKey[1] === 0)
+  //      {
+            console.log(pubKey.toString("hex"),pubKey.length);
+   //     }
     }
     
-    if (counter <= 1000000)
+    if (addresses.hasOwnProperty(encoded))
     {
-        console.log(counter++);
-        console.log(addrWorker.getDigitalAdress('hex'));
+        addresses[encoded]=invalidTries;
+        data[i]=invalidTries;
     }
     else
     {
-        throw "Checked 1 000 000 Times";
+        throw "Duplicated Addresses !!!";
     }
 }
 
-while(true){
-//    testLenght();
+var zlib = require('zlib');
+var input = "Hellow world";
+
+var deflated = zlib.deflateSync(input);
+var inflated = zlib.inflateSync(new Buffer(deflated, 'base64')).toString();
+
+console.log("Gzip compressed ",deflated.length);
+getAddres(0);
+//for (var i =0; i< 10000; i++)
+//{
+//    getAddres(i);
+//    console.log(i);
+//}
+
+//Calculate Average Invalid tries
+var average = 0;
+
+for (var i =0; i<addresses.length;i++)
+{
+    average += data[i];
 }
+average = average /data.length;
+
+console.log(average);
+
+console.log(JSON.stringify(addresses));
+
+console.log("End");
