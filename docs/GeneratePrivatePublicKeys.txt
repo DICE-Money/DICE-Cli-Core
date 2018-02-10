@@ -17,8 +17,15 @@ TestDICECalculator.exe -c .\diceUnit.json 18yEQthHFiSpxCH7T2rkmHHAAykxuKzbmg 1N4
 TestDICECalculator.exe -h .\diceUnit.json 
 
 //Generate Address + Key to JSON
-node index.js -g .\diceUnit.json 
+TestDICECalculator.exe -g .\diceUnit.json 
 
 //Get value of diceUnit
 //z = 20 , N = 44
-node index.js -v .\diceUnit.json 20 44
+TestDICECalculator.exe -v .\diceUnit.json 20 44
+
+//Node js
+node index.js -c .\diceUnit.json 2eAvZamZ1aVhSDCbXVJ9ZbPrdXS 2d8dQNYt1W2z5QQtUASqQ8TeqXN 12
+
+//Version 1.0
+node index.js -c miner.json unit.txt <addrOp>
+node index.js -c miner.json unit.txt 3SEdktQGS4K947PUadvbHFD2oJG
