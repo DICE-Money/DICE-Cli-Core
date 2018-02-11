@@ -26,7 +26,8 @@
 
 //Required 3rd-party libraries
 const modCrypto = require('crypto');
-const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
+//Temporary disabled
+//const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
 const modSHA3 = require('js-sha3');
 const modSwatchTimer = require('../SwatchBeats/SwatchTimer.js');
 const modDICEUnit = require('./DICEUnit.js');
@@ -61,7 +62,7 @@ var _Method = DICECalculator.prototype;
 function DICECalculator(shaType) {
     // always initialize all instance properties
     if (shaType === 'c') {
-        this.sha3 = modSHA3_C;
+        this.sha3 = modSHA3;
     } else {
         this.sha3 = modSHA3;
     }
