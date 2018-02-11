@@ -42,6 +42,7 @@ function TcpWorker() {
     this.sharedBuffer = {'client': undefined, 'server': undefined};
     this.commands = {};
     this.errorCallback = {};
+    this.tcpBuffer = "";
 }
 
 //Private
@@ -77,20 +78,23 @@ function sliceDataByAddr(data) {
     var splitedText = text.split(cEndOfBuffer);
     var data = {};
     var buf = {};
-    for (var i = 0; i < splitedText.length - 1; i++)
-    {
-        buf = JSON.parse(splitedText[i]);
-        data[buf.addr] = {command: buf.command, data: buf.data};
-    }
+
+    //Prepare data
+    buf = JSON.parse(splitedText[0]);
+    data[buf.addr] = {command: buf.command, data: buf.data};
+
     return data;
 }
 
-function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback) {
+function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback, curInstance) {
     if (tcpWorker.type === 'client') {
         tcpWorker.instance.on('data', function (data) {
             try {
-                view.printCode("DEV_INFO", "DevInf0113", data.toString());
-                buffer[tcpWorker.type] = JSON.parse(data.toString());
+                if (curInstance.tcpClientBuffering(data)) {
+                    view.printCode("DEV_INFO", "DevInf0113", data.toString());
+                    buffer[tcpWorker.type] = JSON.parse(curInstance.getTcpBuffer());
+                    curInstance.clearBuffer();
+                }
             } catch (e) {
                 //Nothing
             }
@@ -98,34 +102,37 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback)
     } else {
         tcpWorker.instance.on('connection', (c) => {
             c.on('data', (data) => {
-                buffer[tcpWorker.type] = sliceDataByAddr(data);
-                var buf = {};
-                try {
-                    for (var addr in buffer[tcpWorker.type]) {
-                        //Get command
-                        command = buffer[tcpWorker.type][addr].command;
+                if (curInstance.tcpServerBuffering(data)) {
+                    buffer[tcpWorker.type] = sliceDataByAddr(curInstance.getTcpBuffer());
+                    var buf = {};
+                    try {
+                        for (var addr in buffer[tcpWorker.type]) {
+                            //Get command
+                            command = buffer[tcpWorker.type][addr].command;
 
-                        //Get only data
-                        data = buffer[tcpWorker.type][addr].data;
+                            //Get only data
+                            data = buffer[tcpWorker.type][addr].data;
 
-                        //Prepare return data by executing of command
-                        commands[command].exec(data, addr, (data) => {
-                            //Async invoking
-                            //Store data by address
-                            buf[addr] = {data: data};
-                            view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
-                            c.write(JSON.stringify(buf));
-                        });
+                            //Prepare return data by executing of command
+                            commands[command].exec(data, addr, (data) => {
+                                //Async invoking
+                                //Store data by address
+                                buf[addr] = {data: data};
+                                view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
+                                c.write(JSON.stringify(buf) + cEndOfBuffer);
+                            });
 
-                        //Invoke on close
-                        c.on('close', function () {
-                            onClientCloseCallback(addr);
-                        });
+                            //Invoke on close
+                            c.on('close', function () {
+                                onClientCloseCallback(addr);
+                            });
+                        }
+                    } catch (e) {
+                        buf[addr] = {data: view.getTextByCode("ERROR", "Err0003")};
+                        c.write(JSON.stringify(buf) + cEndOfBuffer);
+                        view.printCode("ERROR", "Err0003");
                     }
-                } catch (e) {
-                    buf[addr] = {data: view.getTextByCode("ERROR", "Err0003")};
-                    c.write(JSON.stringify(buf));
-                    view.printCode("ERROR", "Err0003");
+                    curInstance.clearBuffer();
                 }
             });
 
@@ -162,7 +169,7 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
     generalCallbacks(this.worker.instance, this.errorCallback, view);
 
     //data managment callbacks
-    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback);
+    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
 };
 
 
@@ -207,4 +214,36 @@ _Method.close = function () {
     this.worker.instance.destroy();
 };
 
+_Method.tcpServerBuffering = function (data) {
+    var isFullMessge = false;
+    if (data.indexOf(cEndOfBuffer) !== -1) {
+        this.tcpBuffer += data;
+        isFullMessge = true;
+    } else {
+        this.tcpBuffer += data;
+    }
+    return isFullMessge;
+};
+
+_Method.tcpClientBuffering = function (data) {
+    var isFullMessge = false;
+    var data = data.toString();
+    if (data.indexOf(cEndOfBuffer) !== -1) {
+        data = data.split(cEndOfBuffer);
+        this.tcpBuffer += data[0];
+        isFullMessge = true;
+    } else {
+        this.tcpBuffer += data;
+    }
+    return isFullMessge;
+};
+
+_Method.getTcpBuffer = function () {
+    var tcpBuffer = this.tcpBuffer;
+    return tcpBuffer;
+};
+
+_Method.clearBuffer = function () {
+    this.tcpBuffer = "";
+};
 module.exports = TcpWorker;
