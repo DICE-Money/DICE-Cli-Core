@@ -204,7 +204,7 @@ _Method.getKeyExchangeCertificate = function (publicKey) {
     var lastSignedDataSignature = this._160k1.sign(lastSignedData);
 
     //5. Return encrypted data
-    return _Encrypt(JSON.stringify({cert: lastSignedData, sign: lastSignedDataSignature}), _SHA256(sharedKey), null, null);
+    return _Encrypt(JSON.stringify({cert: lastSignedData, sign: lastSignedDataSignature}), _SHA256(sharedKey), null, null).toString("hex");
 };
 
 _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
@@ -212,7 +212,7 @@ _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
     var sharedKey = this._160k1.computeSecret(publicKey);
 
     //2. Decrypt data
-    var decryptedData = JSON.parse(_Decrypt(signedCertificate, _SHA256(sharedKey), null, null));
+    var decryptedData = JSON.parse(_Decrypt(Buffer.from(signedCertificate,"hex"), _SHA256(sharedKey), null, null));
 
     //3. Verify is signed with private key of publicKey (Small)
     if (false !== this._160k1.verify(decryptedData.cert, decryptedData.sign, publicKey)) {
