@@ -54,7 +54,7 @@ function Encryptor(keyPair) {
 }
 
 //Private Methods
-function _Encrypt(data, sharedKey, inFormat, outFormat) {
+function _Encrypt(data, sharedKey) {
     var bufData = new Buffer.from(data);
     let iv = modCrypto.randomBytes(cIV_LENGTH);
     var cipher = modCrypto.createCipheriv(cAlgorithm, sharedKey, iv);
@@ -69,7 +69,7 @@ function _Encrypt(data, sharedKey, inFormat, outFormat) {
     return JSON.stringify(returnData);
 }
 
-function _Decrypt(data, sharedKey, inFormat, outFormat) {
+function _Decrypt(data, sharedKey) {
     var encrypted = JSON.parse(data);
     var decipher = modCrypto.createDecipheriv(cAlgorithm, sharedKey, Buffer.from(encrypted.iv,"hex"));
     decipher.setAuthTag(Buffer.from(encrypted.tag,"hex"));
@@ -94,32 +94,11 @@ function _SHA256(text) {
     return hash;
 }
 
-function _SupportedFormats(data, inputEncoding, outputEncoding) {
-    var returnType = new Buffer.from(data, inputEncoding);
-
-    switch (outputEncoding) {
-        case 'base64':
-            returnType.toString('base64');
-            break;
-        case 'hex':
-            returnType.toString('hex');
-            break;
-        case 'utf8':
-            returnType.toString('utf8');
-            break;
-        default:
-            //Nothing
-            break;
-    }
-
-    return returnType;
-}
-
 //Public Methods
 _Method.encryptDataPublicKey = function (toEncrypt, publicKey) {
 
     //Check for existing certificate
-    if (this._certificateBank !== undefined & publicKey !== undefined) {
+    if (this._certificateBank[publicKey] !== undefined) {
         certificate = this._certificateBank[publicKey];
     } else {
         return "Invalid public Key";
@@ -144,7 +123,7 @@ _Method.decryptDataPublicKey = function (toDecrypt, publicKey) {
     var decryptedAndVerifiedData = undefined;
 
     //Check for existing certificate
-    if (this._certificateBank !== undefined & publicKey !== undefined) {
+    if (this._certificateBank[publicKey] !== undefined) {
         certificate = this._certificateBank[publicKey];
     } else {
         return "Invalid public Key";
