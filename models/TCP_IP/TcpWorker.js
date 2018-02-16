@@ -26,20 +26,30 @@
 
 //Required
 const modNet = require('net');
+const modCluster = require('cluster');
 
 //Class access 
 var _Method = TcpWorker.prototype;
 
 //Local const
+const cMaxListenrs = 100;
 const cSchedulerWorkMs = 10;
 const cEndOfBuffer = '#';
 const cCommandSeparator = '@';
 const cDataBufferSeparator = ':';
+const cNumCPUs = require('os').cpus().length;
 
 //Constructor
 function TcpWorker() {
-    this.worker = {id: undefined, instance: undefined, type: undefined};
-    this.sharedBuffer = {'client': undefined, 'server': undefined};
+    this.worker = {
+        id: undefined,
+        instance: undefined,
+        type: undefined
+    };
+    this.sharedBuffer = {
+        'client': undefined,
+        'server': undefined
+    };
     this.commands = {};
     this.errorCallback = {};
     this.tcpBuffer = "";
@@ -67,22 +77,33 @@ function generalCallbacks(tcpWorker, callback, view) {
         try {
             callback();
         } catch (e) {
-            this.close();
+            //this.close();
             view.printCode("ERROR", "Err0002");
         }
     });
 }
 
-function sliceDataByAddr(data) {
+function sliceDataByAddr(data, curInstance) {
     var text = data.toString();
-    var splitedText = text.split(cEndOfBuffer);
+    var positionOfEndString = text.indexOf(cEndOfBuffer);
+    var splitedText = text.slice(0, positionOfEndString);
     var data = {};
     var buf = {};
-
-    //Prepare data
-    buf = JSON.parse(splitedText[0]);
-    data[buf.addr] = {command: buf.command, data: buf.data};
-
+    try {
+        buf = JSON.parse(splitedText);
+        if (curInstance.worker.type === 'server') {
+            data[buf.addr] = {
+                command: buf.command,
+                data: buf.data
+            };
+        } else {
+            data = buf;
+        }
+    } catch (e) {
+        console.log("Data is not JSON Format");
+    }
+    var restOfData = text.slice(positionOfEndString, (text.length - 1));
+    curInstance.setBuffer(restOfData);
     return data;
 }
 
@@ -90,20 +111,19 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
     if (tcpWorker.type === 'client') {
         tcpWorker.instance.on('data', function (data) {
             try {
-                if (curInstance.tcpClientBuffering(data)) {
+                if (curInstance.tcpServerBuffering(data)) {
                     view.printCode("DEV_INFO", "DevInf0113", data.toString());
-                    buffer[tcpWorker.type] = JSON.parse(curInstance.getTcpBuffer());
-                    curInstance.clearBuffer();
+                    buffer[tcpWorker.type] = sliceDataByAddr(curInstance.getTcpBuffer(), curInstance);
                 }
             } catch (e) {
-                //Nothing
+                console.log("Data is not JSON Format");
             }
         });
     } else {
         tcpWorker.instance.on('connection', (c) => {
             c.on('data', (data) => {
                 if (curInstance.tcpServerBuffering(data)) {
-                    buffer[tcpWorker.type] = sliceDataByAddr(curInstance.getTcpBuffer());
+                    buffer[tcpWorker.type] = sliceDataByAddr(curInstance.getTcpBuffer(), curInstance);
                     var buf = {};
                     try {
                         for (var addr in buffer[tcpWorker.type]) {
@@ -117,7 +137,9 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
                             commands[command].exec(data, addr, (data) => {
                                 //Async invoking
                                 //Store data by address
-                                buf[addr] = {data: data};
+                                buf[addr] = {
+                                    data: data
+                                };
                                 view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
                                 c.write(JSON.stringify(buf) + cEndOfBuffer);
                             });
@@ -128,11 +150,12 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
                             });
                         }
                     } catch (e) {
-                        buf[addr] = {data: view.getTextByCode("ERROR", "Err0003")};
+                        buf[addr] = {
+                            data: view.getTextByCode("ERROR", "Err0003")
+                        };
                         c.write(JSON.stringify(buf) + cEndOfBuffer);
-                        view.printCode("ERROR", "Err0003");
+                        view.printCode("ERROR", "Err0003", e);
                     }
-                    curInstance.clearBuffer();
                 }
             });
 
@@ -145,12 +168,32 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
 //Public
 _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, onClientCloseCallback) {
     if ("server" === serverOrClient) {
-        this.worker.type = 'server';
-        this.worker.instance = createServer(ip, port);
+        if (modCluster.isMaster) {
+            console.log(`Master ${process.pid} is running`);
+            require('events').EventEmitter.prototype._maxListeners = cMaxListenrs;
+            // Fork workers.
+            for (let i = 0; i < cNumCPUs; i++) {
+                modCluster.fork();
+            }
 
-        //Save commands for server 
-        this.commands = commandsOrCallback;
+            modCluster.on('exit', (worker, code, signal) => {
+                console.log(`worker ${worker.process.pid} died`);
+            });
+        } else {
+            this.worker.type = 'server';
+            this.worker.instance = createServer(ip, port);
 
+            //Save commands for server 
+            this.commands = commandsOrCallback;
+
+            console.log(`Worker ${process.pid} started`);
+
+            //set general callbacks
+            generalCallbacks(this.worker.instance, this.errorCallback, view);
+
+            //data managment callbacks
+            dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
+        }
     } else if ("client" === serverOrClient) {
         this.worker.type = 'client';
         this.worker.instance = createClient(ip, port);
@@ -158,18 +201,21 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
         //Error callback for client
         this.errorCallback = commandsOrCallback;
 
+        //set general callbacks
+        generalCallbacks(this.worker.instance, this.errorCallback, view);
+
+        //data managment callbacks
+        dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
+
+        //Remove Nagle algorithm
+        this.worker.instance.setNoDelay();
+
     } else {
         throw "Invalid return request! Try \'server\' !";
     }
 
     //Set unique ID
     this.worker.id = Math.round((Math.random() * 10000));
-
-    //set general callbacks
-    generalCallbacks(this.worker.instance, this.errorCallback, view);
-
-    //data managment callbacks
-    dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
 };
 
 
@@ -177,7 +223,11 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
 _Method.Request = function (command, clientAddr, dataBuffer) {
     if (this.worker.type === 'client') {
         var data = {};
-        data = ({addr: clientAddr, command: command, data: dataBuffer});
+        data = ({
+            addr: clientAddr,
+            command: command,
+            data: dataBuffer
+        });
         this.worker.instance.write(JSON.stringify(data) + cEndOfBuffer);
     }
 };
@@ -225,19 +275,6 @@ _Method.tcpServerBuffering = function (data) {
     return isFullMessge;
 };
 
-_Method.tcpClientBuffering = function (data) {
-    var isFullMessge = false;
-    var data = data.toString();
-    if (data.indexOf(cEndOfBuffer) !== -1) {
-        data = data.split(cEndOfBuffer);
-        this.tcpBuffer += data[0];
-        isFullMessge = true;
-    } else {
-        this.tcpBuffer += data;
-    }
-    return isFullMessge;
-};
-
 _Method.getTcpBuffer = function () {
     var tcpBuffer = this.tcpBuffer;
     return tcpBuffer;
@@ -245,5 +282,9 @@ _Method.getTcpBuffer = function () {
 
 _Method.clearBuffer = function () {
     this.tcpBuffer = "";
+};
+
+_Method.setBuffer = function (data) {
+    this.tcpBuffer = data;
 };
 module.exports = TcpWorker;
