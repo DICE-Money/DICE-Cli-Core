@@ -37,6 +37,7 @@ const cIV_LENGTH = 16; // For AES, this is always 16
 const cErrorLevel_1 = 1;
 const cErrorLevel_2 = 2;
 const cErrorLevel_3 = 3;
+const cAlgorithm = 'aes-256-gcm';
 
 //Constructor
 function Encryptor(keyPair) {
@@ -56,24 +57,24 @@ function Encryptor(keyPair) {
 function _Encrypt(data, sharedKey, inFormat, outFormat) {
     var bufData = new Buffer.from(data);
     let iv = modCrypto.randomBytes(cIV_LENGTH);
-    let cipher = modCrypto.createCipheriv('aes-256-cbc', new Buffer(sharedKey), iv);
-    let encrypted = cipher.update(_SupportedFormats(bufData, inFormat, null));
-
-    encrypted = Buffer.concat([iv, encrypted, cipher.final()]);
-    encrypted = _SupportedFormats(encrypted, null, outFormat);
-
-    return encrypted;
+    var cipher = modCrypto.createCipheriv(cAlgorithm, sharedKey, iv);
+    var encrypted = cipher.update(bufData.toString("hex"), 'hex', 'hex');
+    encrypted += cipher.final('hex');
+    var tag = cipher.getAuthTag();
+    var returnData = {
+        iv: iv.toString("hex"),
+        content: encrypted,
+        tag: tag.toString("hex")
+    };
+    return JSON.stringify(returnData);
 }
 
 function _Decrypt(data, sharedKey, inFormat, outFormat) {
-    var bufData = new Buffer.from(data);
-    let iv = new Buffer(bufData.slice(0, cIV_LENGTH));
-    let decipher = modCrypto.createDecipheriv('aes-256-cbc', new Buffer(sharedKey), iv);
-    let decrypted = decipher.update(bufData.slice(cIV_LENGTH, bufData.length));
-
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    decrypted = _SupportedFormats(decrypted, null, outFormat);
-
+    var encrypted = JSON.parse(data);
+    var decipher = modCrypto.createDecipheriv(cAlgorithm, sharedKey, Buffer.from(encrypted.iv,"hex"));
+    decipher.setAuthTag(Buffer.from(encrypted.tag,"hex"));
+    var decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
     return decrypted;
 }
 
@@ -204,7 +205,7 @@ _Method.getKeyExchangeCertificate = function (publicKey) {
     var lastSignedDataSignature = this._160k1.sign(lastSignedData);
 
     //5. Return encrypted data
-    return _Encrypt(JSON.stringify({cert: lastSignedData, sign: lastSignedDataSignature}), _SHA256(sharedKey), null, null).toString("hex");
+    return _Encrypt(JSON.stringify({cert: lastSignedData, sign: lastSignedDataSignature}), _SHA256(sharedKey), null, null);
 };
 
 _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
@@ -212,7 +213,7 @@ _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
     var sharedKey = this._160k1.computeSecret(publicKey);
 
     //2. Decrypt data
-    var decryptedData = JSON.parse(_Decrypt(Buffer.from(signedCertificate,"hex"), _SHA256(sharedKey), null, null));
+    var decryptedData = JSON.parse(_Decrypt(signedCertificate, _SHA256(sharedKey), null, null));
 
     //3. Verify is signed with private key of publicKey (Small)
     if (false !== this._160k1.verify(decryptedData.cert, decryptedData.sign, publicKey)) {
