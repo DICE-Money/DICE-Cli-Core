@@ -157,7 +157,7 @@ _Method.deCompressPublicKey = function (pubKey) {
 
     lastFourBits = bin2dec(address.slice(0, address.length - 1));
 
-    address = `0${sign}${pub.slice(1, pubKey.length)}${lastFourBits.toString(16)}`;
+    address = `0${sign}${pub.slice(1, pub.length)}${lastFourBits.toString(16)}`;
     return address;
 };
 
