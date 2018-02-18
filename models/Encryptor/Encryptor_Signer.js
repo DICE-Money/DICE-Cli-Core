@@ -34,6 +34,7 @@ var _Method = Encryptor.prototype;
 
 //Local const
 const cIV_LENGTH = 16; // For AES, this is always 16
+const cAUTH_TAG_LENGTH = 32; // For GCM, is always 32
 const cErrorLevel_1 = 1;
 const cErrorLevel_2 = 2;
 const cErrorLevel_3 = 3;
@@ -66,11 +67,11 @@ function _Encrypt(data, sharedKey) {
         content: encrypted,
         tag: tag.toString("hex")
     };
-    return JSON.stringify(returnData);
+    return Buffer.from(JSON.stringify(returnData),"utf8").toString("hex");
 }
 
 function _Decrypt(data, sharedKey) {
-    var encrypted = JSON.parse(data);
+    var encrypted = JSON.parse(Buffer.from(data,"hex").toString("utf8"));
     var decipher = modCrypto.createDecipheriv(cAlgorithm, sharedKey, Buffer.from(encrypted.iv,"hex"));
     decipher.setAuthTag(Buffer.from(encrypted.tag,"hex"));
     var decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
