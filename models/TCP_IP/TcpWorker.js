@@ -123,6 +123,9 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
         tcpWorker.instance.on('connection', (c) => {
             c.on('data', (data) => {
                 if (curInstance.tcpServerBuffering(data)) {
+                    //Remove Nagle algorithm
+                    c.setNoDelay(true);
+                    //Get only ready messages
                     buffer[tcpWorker.type] = sliceDataByAddr(curInstance.getTcpBuffer(), curInstance);
                     var buf = {};
                     try {
@@ -132,7 +135,7 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
 
                             //Get only data
                             data = buffer[tcpWorker.type][addr].data;
-
+                            c.pause();
                             //Prepare return data by executing of command
                             commands[command].exec(data, addr, (data) => {
                                 //Async invoking
@@ -143,7 +146,7 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
                                 view.printCode("DEV_INFO", "DevInf0113", JSON.stringify(buffer[tcpWorker.type]));
                                 c.write(JSON.stringify(buf) + cEndOfBuffer);
                             });
-
+                            c.resume();
                             //Invoke on close
                             c.on('close', function () {
                                 onClientCloseCallback(addr);
@@ -193,6 +196,7 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
 
             //data managment callbacks
             dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
+
         }
     } else if ("client" === serverOrClient) {
         this.worker.type = 'client';
@@ -208,7 +212,7 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
         dataCallbacks(this.worker, this.sharedBuffer, this.commands, view, onClientCloseCallback, this);
 
         //Remove Nagle algorithm
-        this.worker.instance.setNoDelay();
+        this.worker.instance.setNoDelay(true);
 
     } else {
         throw "Invalid return request! Try \'server\' !";
