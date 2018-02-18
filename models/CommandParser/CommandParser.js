@@ -43,8 +43,14 @@ _Method.getExecFuncByTable = function (table) {
     var execFunc = 'ERROR';
     for (var i = 0; i < table.length; i++) {
         if (true === (table[i].args.includes(this.commandArgs[0]))) {
-            this.setDatArgs(table[i]);
-
+            this.setDatArgs(table[i], false);
+            //Check is program has enought arguments
+            if (this.commandArgs.length >= table[i].dataArgs.length) {
+                execFunc = table[i].exec;
+                break;
+            }
+        } else if (true === (table[i].args.includes(this.commandArgs[1]))){
+            this.setDatArgs(table[i], true);
             //Check is program has enought arguments
             if (this.commandArgs.length >= table[i].dataArgs.length) {
                 execFunc = table[i].exec;
@@ -55,11 +61,15 @@ _Method.getExecFuncByTable = function (table) {
     return execFunc;
 };
 
-_Method.setDatArgs = function (tableElement) {
+_Method.setDatArgs = function (tableElement, isNexeBuild) {
     var dataSaved = '';
     for (var i = 0; i < tableElement.dataArgs.length; i++) {
         dataSaved = tableElement.dataArgs[i];
-        this.appArgs[dataSaved] = this.commandArgs[i + 1];
+        if (true !== isNexeBuild) {
+            this.appArgs[dataSaved] = this.commandArgs[i + 1];
+        } else {
+            this.appArgs[dataSaved] = this.commandArgs[i + 2];
+        }
     }
 };
 
@@ -69,7 +79,7 @@ _Method.getHelpString = function (table) {
         text += "  ";
         text += table[i].args.toString();
         text += "\n     " + table[i].help;
-        text += "\n     Usage: <application> <"+ table[i].args.join(' or ') +"> <" + table[i].dataArgs.join('> <') + ">\n\n";
+        text += "\n     Usage: <application> <" + table[i].args.join(' or ') + "> <" + table[i].dataArgs.join('> <') + ">\n\n";
     }
     return text;
 };
