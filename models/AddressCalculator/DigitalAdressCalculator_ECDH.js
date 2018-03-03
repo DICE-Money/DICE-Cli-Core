@@ -34,14 +34,14 @@ modBase58 = new modBase58();
 var _Method = DigitalAdressCalculator.prototype;
 
 //Local constants 
-const cCurveECDH = "sect131r1"; //Compressed output 17
+const cCurveECDH = "secp160k1"; //Compressed output 21
 const cECDH = modCrypto.createECDH(cCurveECDH);
 
 // Constructor
 function DigitalAdressCalculator() {
     // always initialize all instance properties
     this.privateKey = "NOK";
-    this.digitalAdress = "NOK";
+    this.digitalAddress = "NOK";
     this.ecSecp160k1 = new modSecp160k1();
 }
 
@@ -64,7 +64,7 @@ _Method.CalculateKeyAdressPair = function () {
 
     //Save them to local vars
     this.privateKey = keyPair.private.toString('hex');
-    this.digitalAdress = keyPair.public.toString('hex');
+    this.digitalAddress = keyPair.public.toString('hex');
 };
 
 //Export Get methods
@@ -82,19 +82,93 @@ _Method.getPrivateKey = function (format) {
 };
 
 _Method.getDigitalAdress = function (format) {
-    var digitalAddr = Buffer.from(this.digitalAdress, 'hex');
+    var digitalAddr = Buffer.from(this.digitalAddress, 'hex');
 
     if (format === 'bs58') {
         digitalAddr = modBase58.encode(digitalAddr);
     } else if (format === 'hex') {
-        digitalAddr = this.digitalAdress;
-    } else {
-        //Nothing
+        digitalAddr = this.digitalAddress;
+    } else if (format === 'hexDash') {
+        digitalAddr = this.convertHexToHexDash(this.digitalAddress);
     }
 
     return digitalAddr;
 };
 
+_Method.fromHexDash = function (keyPair) {
+    try {
+        this.privateKey = modBase58.decode(keyPair.privateKey);
+
+    } catch (e) {
+        this.privateKey = keyPair.privateKey.toString('hex');
+    }
+
+    //Save to Local Instance
+    this.digitalAddress = this.convertHexDashToHex(keyPair.digitalAddress);
+
+    //Return as Base 58
+    return {privateKey: keyPair.privateKey, digitalAddress: this.convertHexDashToBS58(keyPair.digitalAddress)};
+};
+
+_Method.convertHexDashToBS58 = function (digitalAddr) {
+    var addr = "";
+    for (var i = 0; i < digitalAddr.length; i++) {
+        if (digitalAddr[i] !== "-") {
+            addr += digitalAddr[i];
+        }
+    }
+    return modBase58.encode(Buffer.from(addr, "hex"));
+};
+
+_Method.convertHexDashToHex = function (digitalAddr) {
+    var addr = "";
+    for (var i = 0; i < digitalAddr.length; i++) {
+        if (digitalAddr[i] !== "-") {
+            addr += digitalAddr[i];
+        }
+    }
+    return addr;
+};
+
+
+_Method.convertBS58ToHexDash = function (digitalAddr) {
+    var addr = '';
+    try {
+        digitalAddr = modBase58.decode(digitalAddr).toString('hex');
+        for (var i = 0; i < digitalAddr.length; i++) {
+            if (i % 5 === 0 && i > 0) {
+                addr += '-';
+            }
+            addr += digitalAddr[i];
+        }
+    } catch (e) {
+        //Nothing the input is not Base 58
+    }
+    return addr;
+};
+
+_Method.convertBS58ToHexUnderLine = function (digitalAddr) {
+    var addr = '';
+    digitalAddr = modBase58.decode(digitalAddr).toString('hex');
+    for (var i = 0; i < digitalAddr.length; i++) {
+        if (i % 5 === 0 && i > 0) {
+            addr += '_';
+        }
+        addr += digitalAddr[i];
+    }
+    return addr;
+};
+
+_Method.convertHexToHexDash = function (digitalAddr) {
+    var addr = '';
+    for (var i = 0; i < digitalAddr.length; i++) {
+        if (i % 5 === 0 && i > 0) {
+            addr += '-';
+        }
+        addr += digitalAddr[i];
+    }
+    return addr;
+};
 
 // export the class
 module.exports = DigitalAdressCalculator;

@@ -42,6 +42,8 @@ function Secp160k1(keyPair) {
     this.keys = 0;
     this.ecSecp160k1 = new modEc('p160');
     this.cryptoSecp160k1 = modCrypto.createECDH("secp160k1");
+    this.goodTry = 0;
+    this.badTry = 0;
 
     //Set keys
     this.setKeys(keyPair);
@@ -53,7 +55,7 @@ _Method.getKeyPair = function () {
     this.cryptoSecp160k1.setPrivateKey(this.keys.getPrivate("hex"), "hex");
     var pub = this.cryptoSecp160k1.getPublicKey(null, "compressed");
 
-    return {private: this.keys.getPrivate(), public: this.compressPublicKey(pub)};
+    return {private: this.keys.getPrivate(), public: this.compressPublicKey(pub), good: this.goodTry, bad: this.badTry};
 };
 
 _Method.genarateKeys = function () {
@@ -64,12 +66,17 @@ _Method.genarateKeys = function () {
         key = this.ecSecp160k1.genKeyPair();
         this.cryptoSecp160k1.setPrivateKey(key.getPrivate("hex"), "hex");
         pub = this.cryptoSecp160k1.getPublicKey(null, "compressed").toString("hex");
-
+        
+        this.goodTry++;
+        
         if (pub[cSizeOfDA * 2 + 1] <= cLastThreeBitValue) {
             if (key.getPrivate().length === cMinimuLengthOfPrivateKey) {
                 isReady = false;
+            }else{
+                this.badTry++;
             }
         }
+        
     } while (isReady)
 
     //Save 
