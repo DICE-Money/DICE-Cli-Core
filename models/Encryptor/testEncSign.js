@@ -38,10 +38,10 @@ for (var i = 0; i < 10000; i++) {
     var keysOperator = digitalAdressWorker_160k1.getKeyPair();
 
 //2.1. Create Instance of encryptor (Miner side)
-    var enc_M = new modEncryptor(keysMiner);
+    var enc_M = new modEncryptor(keysMiner,"general");
 
 //2.2. Create Instance of encryptor (Operator side)
-    var enc_O = new modEncryptor(keysOperator);
+    var enc_O = new modEncryptor(keysOperator,"general");
 
 //3. Miner prepare signed and encrypted data to Operator
 //   Miner knows only public key !

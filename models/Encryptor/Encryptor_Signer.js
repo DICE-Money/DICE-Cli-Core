@@ -27,7 +27,7 @@
 //Required
 const modCrypto = require("crypto");
 const modSecp160k1 = require("../AddressCalculator/Secp160k1.js");
-const modSecp521r1 = require("../AddressCalculator/Secp521r1.js");
+const certificateWorker = require("../AddressCalculator/CertificateWorker.js");
 
 //Class access 
 var _Method = Encryptor.prototype;
@@ -41,14 +41,13 @@ const cErrorLevel_3 = 3;
 const cAlgorithm = 'aes-256-gcm';
 
 //Constructor
-function Encryptor(keyPair) {
+function Encryptor(keyPair, security) {
 
     //Init component with already known keys
     this._160k1 = new modSecp160k1(_checkForNull(keyPair));
 
-    //Create unique key pair for big keys
-    this._521r1 = new modSecp521r1();
-    this._521r1.genarateKeys();
+    //Set Security
+    _Method.setSecurityLevel(security);
 
     //Hold Big Certificate
     this._certificateBank = {digitalAddress: undefined, certificate: undefined};
@@ -63,18 +62,18 @@ function _Encrypt(data, sharedKey) {
     encrypted += cipher.final('hex');
     var tag = cipher.getAuthTag();
     var returnData = {
-        iv: iv.toString("hex"),
-        content: encrypted,
-        tag: tag.toString("hex")
+        iv: iv.toString("base64"),
+        content: Buffer.from(encrypted,"hex").toString("base64"),
+        tag: tag.toString("base64")
     };
-    return Buffer.from(JSON.stringify(returnData),"utf8").toString("hex");
+    return Buffer.from(JSON.stringify(returnData), "utf8").toString("base64");
 }
 
 function _Decrypt(data, sharedKey) {
-    var encrypted = JSON.parse(Buffer.from(data,"hex").toString("utf8"));
-    var decipher = modCrypto.createDecipheriv(cAlgorithm, sharedKey, Buffer.from(encrypted.iv,"hex"));
-    decipher.setAuthTag(Buffer.from(encrypted.tag,"hex"));
-    var decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
+    var encrypted = JSON.parse(Buffer.from(data, "base64").toString("utf8"));
+    var decipher = modCrypto.createDecipheriv(cAlgorithm, sharedKey, Buffer.from(encrypted.iv, "base64"));
+    decipher.setAuthTag(Buffer.from(encrypted.tag, "base64"));
+    var decrypted = decipher.update(encrypted.content, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
 }
@@ -106,14 +105,14 @@ _Method.encryptDataPublicKey = function (toEncrypt, publicKey) {
     }
 
     //1. Prepare secret
-    var sharedKey = this._521r1.computeSecret(certificate);
+    var sharedKey = this.certWorker.computeSecret(certificate);
 
     //2. Sign with small key
     var smallSignature = this._160k1.sign(toEncrypt);
 
     //3. Sign data and signature with big key
     var dataAndSmallSignature = {data: toEncrypt, sign: smallSignature};
-    var dataAndBigSignature = this._521r1.sign(JSON.stringify(dataAndSmallSignature));
+    var dataAndBigSignature = this.certWorker.sign(JSON.stringify(dataAndSmallSignature));
 
     //4. Return encetypted data with two signatures
     return _Encrypt(JSON.stringify({data: dataAndSmallSignature, sign: dataAndBigSignature}), _SHA256(sharedKey), null, null);
@@ -131,13 +130,13 @@ _Method.decryptDataPublicKey = function (toDecrypt, publicKey) {
     }
 
     //1. Prepare secret 
-    var sharedKey = this._521r1.computeSecret(certificate);
+    var sharedKey = this.certWorker.computeSecret(certificate);
 
     //2. Decrypt data and parse it to object
     var decryptedData = JSON.parse(_Decrypt(toDecrypt, _SHA256(sharedKey), null, null));
 
     //3. Verify is signed with private key of publicKey (Big)
-    if (false !== this._521r1.verify(JSON.stringify(decryptedData.data), decryptedData.sign, certificate)) {
+    if (false !== this.certWorker.verify(JSON.stringify(decryptedData.data), decryptedData.sign, certificate)) {
 
         //4. Verify is signed with private key of publicKey (Big)
         if (false !== this._160k1.verify(decryptedData.data.data, decryptedData.data.sign, publicKey)) {
@@ -168,17 +167,23 @@ _Method.setPrivateKey = function (keyPair) {
     this._160k1 = new modSecp160k1(keyPair);
 };
 
+_Method.setSecurityLevel = function (security) {
+    //Create unique key pair for big keys
+    this.certWorker = new certificateWorker(security);
+    this.certWorker.genarateKeys();
+};
+
 _Method.getKeyExchangeCertificate = function (publicKey) {
     //1. Prepare sectret
     var sharedKey = this._160k1.computeSecret(publicKey);
 
     //2. Prepare certificate and sign it with small key
-    var bigCertificate = this._521r1.getCertificate();
+    var bigCertificate = this.certWorker.getCertificate();
     var bigCertSignature = this._160k1.sign(bigCertificate);
 
     //3. Sign bigCertificate with big key
     var bigCertWithSiganture = {cert: bigCertificate, sign: bigCertSignature};
-    var bigCertSignPairSignature = this._521r1.sign(JSON.stringify(bigCertWithSiganture));
+    var bigCertSignPairSignature = this.certWorker.sign(JSON.stringify(bigCertWithSiganture));
 
     //4. Last Sign everything with small key
     var lastSignedData = {cert: bigCertWithSiganture, sign: bigCertSignPairSignature};
@@ -199,7 +204,7 @@ _Method.acceptKeyExchangeCertificate = function (signedCertificate, publicKey) {
     if (false !== this._160k1.verify(decryptedData.cert, decryptedData.sign, publicKey)) {
 
         //4. Verify is signed with private key of publicKey (Big)
-        if (false !== this._521r1.verify(JSON.stringify(decryptedData.cert.cert), decryptedData.cert.sign, decryptedData.cert.cert.cert)) {
+        if (false !== this.certWorker.verify(JSON.stringify(decryptedData.cert.cert), decryptedData.cert.sign, decryptedData.cert.cert.cert)) {
 
             //5. Verify is signed with private key of publicKey (Small)
             if (false !== this._160k1.verify(decryptedData.cert.cert.cert, decryptedData.cert.cert.sign, publicKey)) {
