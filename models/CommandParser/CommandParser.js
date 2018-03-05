@@ -45,14 +45,14 @@ _Method.getExecFuncByTable = function (table) {
         if (true === (table[i].args.includes(this.commandArgs[0]))) {
             this.setDatArgs(table[i], false);
             //Check is program has enought arguments
-            if (this.commandArgs.length >= table[i].dataArgs.length) {
+            if (this.commandArgs.length != 0) {
                 execFunc = table[i].exec;
                 break;
             }
         } else if (true === (table[i].args.includes(this.commandArgs[1]))){
             this.setDatArgs(table[i], true);
             //Check is program has enought arguments
-            if (this.commandArgs.length >= table[i].dataArgs.length) {
+            if (this.commandArgs.length != 0) {
                 execFunc = table[i].exec;
                 break;
             }
