@@ -26,12 +26,13 @@
 
 //Required
 const modFs = require('fs');
+const modHttp = require('https');
 
 //Class access 
 var _Method = DNSBinder.prototype;
 
 //Local const
-
+const cDnsHttp = "./dns.json";
 
 //Construtor
 function DNSBinder() {
@@ -66,10 +67,9 @@ _Method.initializeDB = function (pathToStorage, typeOfStorage) {
     if ('json' === typeOfStorage) {
         try {
             this.fileDB = modFs.readFileSync(pathToStorage, "utf8");
-            if ("" !== this.fileDB){
+            if ("" !== this.fileDB) {
                 this.fileDB = JSON.parse(this.fileDB);
-            }
-            else{
+            } else {
                 throw "Invalid DNSBinder DB";
             }
         } catch (err) {
@@ -82,6 +82,19 @@ _Method.initializeDB = function (pathToStorage, typeOfStorage) {
 _Method.clean = function () {
     this.fileDB = {};
     modFs.writeFileSync(this.filePath, JSON.stringify(this.fileDB, null, 0), 'utf-8');
+};
+
+_Method.readFromHttpServer = function (link, cb) {
+    var module = this;
+    var file = modFs.createWriteStream(cDnsHttp);
+    modHttp.get(link, function (response) {
+        response.pipe(file);
+        file.on('finish', function () {
+            file.close();
+            module.initializeDB(cDnsHttp, "json");
+            cb();
+        });
+    });
 };
 
 module.exports = DNSBinder;
