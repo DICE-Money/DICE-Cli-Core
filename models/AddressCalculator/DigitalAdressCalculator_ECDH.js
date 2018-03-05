@@ -36,6 +36,8 @@ var _Method = DigitalAdressCalculator.prototype;
 //Local constants 
 const cCurveECDH = "secp160k1"; //Compressed output 21
 const cECDH = modCrypto.createECDH(cCurveECDH);
+const cLenghtOfRealAddr = 20 * 2;
+const cLenghtOfAddr = cLenghtOfRealAddr + (cLenghtOfRealAddr / 5) - 1;
 
 // Constructor
 function DigitalAdressCalculator() {
@@ -168,6 +170,17 @@ _Method.convertHexToHexDash = function (digitalAddr) {
         addr += digitalAddr[i];
     }
     return addr;
+};
+
+_Method.IsValidAddress = function (addr) {
+    var isValid = false;
+    if (addr !== undefined) {
+        var temp = this.convertHexDashToHex(addr);
+        if (temp.length === cLenghtOfRealAddr) {
+            isValid = true;
+        }
+    }
+    return isValid;
 };
 
 // export the class
