@@ -36,3 +36,4 @@ var addr = dns.lookup("2eAvZamZ1aVhSDCbXVJ9ZbPrdXS");
 console.log(addr.ip, addr.port);
 
 //dns.clean();
+dns.getGoogleDriveNewUrl("dns_1.json");

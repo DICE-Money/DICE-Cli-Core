@@ -97,4 +97,43 @@ _Method.readFromHttpServer = function (link, cb) {
     });
 };
 
+_Method.getGoogleDriveNewUrl = function (data) {
+    data = modFs.readFileSync(data).toString();
+    var httpsPosStart = data.indexOf("https");
+    var httpsPosEnd = data.indexOf("download", httpsPosStart);
+    var url = data.substr(httpsPosStart, (httpsPosEnd+"download".length) - httpsPosStart);
+    return url;
+
+};
+
+_Method.getGoogleDriveData = function (link, cb) {
+    var module = this;
+    var file = modFs.createWriteStream(cDnsHttp);
+    modHttp.get(link, function (response) {
+        response.pipe(file);
+        file.on('finish', function () {
+            //Close file
+            file.close();
+
+            //Read new link
+            var newUrl = module.getGoogleDriveNewUrl(cDnsHttp);
+
+            //Delete file
+            modFs.unlink(cDnsHttp, () => {
+                file = modFs.createWriteStream(cDnsHttp);
+                modHttp.get(newUrl, function (response) {
+                    response.pipe(file);
+                    file.on('finish', function () {
+                        file.close();
+                        module.initializeDB(cDnsHttp, "json");
+                        cb();
+                    });
+                });
+            });
+        });
+    });
+
+};
+
+
 module.exports = DNSBinder;
