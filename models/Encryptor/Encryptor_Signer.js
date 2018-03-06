@@ -63,7 +63,7 @@ function _Encrypt(data, sharedKey) {
     var tag = cipher.getAuthTag();
     var returnData = {
         iv: iv.toString("base64"),
-        content: Buffer.from(encrypted,"hex").toString("base64"),
+        content: Buffer.from(encrypted, "hex").toString("base64"),
         tag: tag.toString("base64")
     };
     return Buffer.from(JSON.stringify(returnData), "utf8").toString("base64");
@@ -228,6 +228,10 @@ _Method.removeOldCertificate = function (publicKey) {
     } catch (e) {
         //The operation was invalid but there is no action needed
     }
+};
+
+_Method.IsBankEmpty = function () {
+    return Object.keys(this._certificateBank).length === 2;
 };
 
 module.exports = Encryptor;
