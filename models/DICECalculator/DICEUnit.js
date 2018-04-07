@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -26,6 +27,9 @@
 
 //Required 3rd-party libraries
 var modBase58 = require('../Base58/Base58.js');
+/* javascript-obfuscator:enable */
+
+//Create Instance
 modBase58 = new modBase58();
 
 //Class access 

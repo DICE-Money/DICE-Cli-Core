@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -26,6 +27,7 @@
 
 //Required
 const modDICEPrototype = require('../DICECalculator/DICEPrototype.js');
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = DICEValue.prototype;

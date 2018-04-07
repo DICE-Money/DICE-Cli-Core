@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -27,6 +28,7 @@
 //Required
 const modFs = require('fs');
 const modMySql = require('mysql');
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = DBWorker_MySql_Async.prototype;

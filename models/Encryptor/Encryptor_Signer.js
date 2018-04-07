@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -28,6 +29,7 @@
 const modCrypto = require("crypto");
 const modSecp160k1 = require("../AddressCalculator/Secp160k1.js");
 const certificateWorker = require("../AddressCalculator/CertificateWorker.js");
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = Encryptor.prototype;

@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -25,6 +26,7 @@
  */
 
 //Required
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = CommandParser.prototype;

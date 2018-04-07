@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -26,6 +27,7 @@
 
 //Required
 const modBS58 = require('bs58');
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = Base58.prototype;

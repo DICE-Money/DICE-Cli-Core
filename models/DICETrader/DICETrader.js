@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -27,6 +28,7 @@
 //Required
 const modBase58 = require('../Base58/Base58.js');
 const modFs = require('fs');
+/* javascript-obfuscator:enable */
 
 //Class access 
 var _Method = DICETrader.prototype;

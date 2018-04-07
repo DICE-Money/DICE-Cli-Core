@@ -1,3 +1,4 @@
+/* javascript-obfuscator:disable */
 /* 
  * Copyright (c) 2017, Mihail Maldzhanski
  * All rights reserved.
@@ -34,6 +35,7 @@ const modDICEUnit = require('./DICEUnit.js');
 const modDICEPrototype = require('./DICEPrototype.js');
 const modChild_process = require('child_process');
 const modFs = require('fs');
+/* javascript-obfuscator:enable */
 
 //Const parameters
 const cMaxValidZeros = 256;
