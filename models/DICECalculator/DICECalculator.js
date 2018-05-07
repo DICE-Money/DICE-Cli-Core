@@ -28,7 +28,7 @@
 //Required 3rd-party libraries
 const modCrypto = require('crypto');
 //Temporary disabled
-//const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
+const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
 const modSHA3 = require('js-sha3');
 const modSwatchTimer = require('../SwatchBeats/SwatchTimer.js');
 const modDICEUnit = require('./DICEUnit.js');
@@ -82,7 +82,6 @@ function DICECalculator(shaType) {
  * @memberOf DICECalculator
  * @function
  * @name Alive
- * @param None
  * @return None
  */
 _Method.Alive = function () {
@@ -102,7 +101,7 @@ _Method.Alive = function () {
  * @return {DICEUnit} unit - valid DICE unit
  */
 _Method.getValidDICE = function (addrOp, addrMin, validZeroes) {
-    return _CalculateDICEUnit(addrOp, addrMin, validZeroes, this.sha3, this.sha3Counter,this.type);
+    return _CalculateDICEUnit(addrOp, addrMin, validZeroes, this.sha3, this.sha3Counter, this.type);
 };
 
 /**
@@ -113,13 +112,13 @@ _Method.getValidDICE = function (addrOp, addrMin, validZeroes) {
  * @name getValidDICE_CUDA
  * @param {String} addrOp - Digital Address of Operator
  * @param {String} addrMin - Digital Address of Miner
- * @param {Integer} validZeroes - Minimum required zeroes in hash of prototype
+ * @param {Integer} validZeros - Minimum required zeroes in hash of prototype
  * @param {String} cudaAppPath - Path to Cuda application
  * @param {String} outputFile - File to store calculated Unit
  * @return {DICEUnit} unit - valid DICE unit
  */
-_Method.getValidDICE_CUDA = function (addrOp, addrMin, validZeros, cudaAppPath, outputFile) {
-    return  _CalculateDICEUnitCUDA(addrOp, addrMin, validZeros, cudaAppPath, outputFile);
+_Method.getValidDICE_CUDA = function (addrOp, addrMin, validZeros, globalTh, cudaAppPath, outputFile, diceScrapCallback, finishCallback) {
+    return  _CalculateDICEUnitCUDA_Scrapping(addrOp, addrMin, validZeros, globalTh, cudaAppPath, outputFile, diceScrapCallback, finishCallback);
 };
 
 /**
@@ -127,11 +126,11 @@ _Method.getValidDICE_CUDA = function (addrOp, addrMin, validZeros, cudaAppPath, 
  * @function
  * @memberOf DICECalculator
  * @name getSHA3OfUnit
- * @param {DICEUnit} Dice - Calculated DICE unit.
+ * @param {DICEUnit} DICEUnit - Calculated DICE unit.
  * @return {Buffer} SHA3 of DICE Unit 
  */
 _Method.getSHA3OfUnit = function (DICEUnit) {
-    return _GetSHA3OfValidUnit(DICEUnit, this.sha3, this.sha3Counter,this.type);
+    return _GetSHA3OfValidUnit(DICEUnit, this.sha3, this.sha3Counter, this.type);
 };
 
 /**
@@ -139,7 +138,7 @@ _Method.getSHA3OfUnit = function (DICEUnit) {
  * @function
  * @memberOf DICECalculator
  * @name getSHA3OfProtoType
- * @param {DICEPrototype} Dice - Calculated DICE Prototype.
+ * @param {DICEPrototype} DICEProto - Calculated DICE Prototype.
  * @return {Buffer} SHA3 of DICE Prototype. 
  */
 _Method.getSHA3OfProtoType = function (DICEProto) {
@@ -175,7 +174,6 @@ _Method.CalculateSHA3_512 = function (buffer) {
  * @function
  * @memberOf DICECalculator
  * @name getSHA3Count
- * @param None
  * @return {Integer} count of how many times SHA3 was invoked
  */
 _Method.getSHA3Count = function () {
@@ -199,9 +197,10 @@ function _CalculatePayload(DICEUnit) {
  * @function
  * @private
  * @name _CalculateSHA3_512
- * @param {String} buffer, {Buffer} buffer
+ * @param {String} buffer or {Buffer} buffer
  * @param {Module} sha3 - instance of module which will be used to calculate SHA3 of input data.
  * @param {Integer} counter - increment the counter when function called.
+ * @param {String} type - "c" or "js"
  * @return {String} data in hex.
  */
 function _CalculateSHA3_512(buffer, sha3, counter, type) {
@@ -209,7 +208,7 @@ function _CalculateSHA3_512(buffer, sha3, counter, type) {
     var bufferL = undefined;
     if (type === 'c') {
         bufferL = Buffer.from(buffer).toString('hex');
-    }else{
+    } else {
         bufferL = buffer;
     }
     return sha3.sha3_512(bufferL);
@@ -269,11 +268,11 @@ function _CalculateDICEUnit(addrOp, addrMin, validZeros, sha3, counter, type) {
 
         //Create Prototype from Unit and hashing of Payload
         DICEPrototypeL.setSwatchTime(DICEUnit.swatchTime);
-        SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter,type);
+        SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter, type);
         DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
 
         //Create SHA3-512 to whole Prototype
-        SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array(), sha3, counter,type);
+        SHA_DICEPrototype = _CalculateSHA3_512(DICEPrototypeL.toUint8Array(), sha3, counter, type);
 
         //Validate
         isInValidDICE = _CheckValidZeroes(SHA_DICEPrototype, DICEPrototypeL.validZeros[0]);
@@ -309,6 +308,138 @@ function _CalculateDICEUnitCUDA(addrOp, addrMin, validZeros, cudaAppPath, output
     return DICEUnit;
 }
 
+function _CalculateDICEUnitCUDA_Scrapping(addrOp, addrMin, validZeros, globalTh, cudaAppPath, outputFile, diceScrapCallback, finishCallback) {
+    var DICEUnit = new modDICEUnit();
+    var DICEUnitJson = new modDICEUnit();
+    var DICEUnitScrap = new modDICEUnit();
+    globalTh = 34;
+    modChild_process.execFile(cudaAppPath,
+            [
+                outputFile,
+                addrOp,
+                addrMin,
+                _byteToHex(validZeros.toString()),
+                _byteToHex(globalTh.toString())
+            ],
+            {stdio: ['pipe', process.stdout, process.stderr]});
+
+    var scrapBankFiles = {};
+
+    //Wait to generate new unit and check periodically for "scrapped" units
+//    while (true)
+//    {
+//        modFs.readdirSync("./").forEach(file => {
+//            if (file.indexOf("dicescr") !== -1 && !scrapBankFiles.hasOwnProperty(file)) {
+//                scrapBankFiles[file] = modFs.readFileSync(file, "utf8");
+//                DICEUnitJson = DICEUnitScrap.from(scrapBankFiles[file]);
+//                
+//                //Assing data to real bject
+//                DICEUnitScrap.addrOperator = DICEUnitJson.addrOperator;
+//                DICEUnitScrap.addrMiner = DICEUnitJson.addrMiner;
+//                DICEUnitScrap.validZeros = DICEUnitJson.validZeros;
+//                DICEUnitScrap.swatchTime = DICEUnitJson.swatchTime;
+//                DICEUnitScrap.payLoad = DICEUnitJson.payLoad;
+//
+//                diceScrapCallback(DICEUnitScrap);
+//            }
+//        });
+//
+//        try {
+//    var file = modFs.readFileSync(outputFile, "utf8");
+//            break;
+//        } catch (e) {
+//
+//        }
+//    }
+//    
+    // Example when handled through fs.watch() listener
+    var fsWatch = modFs.watch('./', {encoding: 'utf8'}, () => {
+        modFs.readdirSync("./").forEach(file => {
+            if (file.indexOf("dicescr") !== -1 && !scrapBankFiles.hasOwnProperty(file)) {
+                scrapBankFiles[file] = modFs.readFileSync(file, "utf8");
+
+                //Return Dice Scrap function handlers
+                var functionHandlers = {get: getDICEScrap, remove: removeDICEScrap};
+                diceScrapCallback(functionHandlers);
+            }
+
+            try {
+                var file = modFs.readFileSync(outputFile, "utf8");
+                DICEUnitJson = DICEUnit.from(file);
+
+                //Assing data to real bject
+                DICEUnit.addrOperator = DICEUnitJson.addrOperator;
+                DICEUnit.addrMiner = DICEUnitJson.addrMiner;
+                DICEUnit.validZeros = DICEUnitJson.validZeros;
+                DICEUnit.swatchTime = DICEUnitJson.swatchTime;
+                DICEUnit.payLoad = DICEUnitJson.payLoad;
+
+                modFs.unlink(outputFile, function (error) {
+                    if (error) {
+                        throw error;
+                    }
+                });
+
+                //Exit
+                fsWatch.close();
+                finishCallback(DICEUnit);
+            } catch (e)
+            {
+                //Nothing
+            }
+        });
+    });
+
+    function getDICEScrap() {
+        if (Object.keys(scrapBankFiles).length > 0) {
+            var fileName = Object.keys(scrapBankFiles)[0];
+
+            //Read data from JSON file
+            DICEUnitJson = DICEUnitScrap.from(scrapBankFiles[fileName]);
+
+            //Assing data to real bject
+            DICEUnitScrap.addrOperator = DICEUnitJson.addrOperator;
+            DICEUnitScrap.addrMiner = DICEUnitJson.addrMiner;
+            DICEUnitScrap.validZeros = DICEUnitJson.validZeros;
+            DICEUnitScrap.swatchTime = DICEUnitJson.swatchTime;
+            DICEUnitScrap.payLoad = DICEUnitJson.payLoad;
+
+        }
+
+        return {fileName: fileName, unit: DICEUnitScrap};
+    }
+
+    function removeDICEScrap(file) {
+        //Delete on FS
+        modFs.unlink(file, () => {/*Nothing*/
+        });
+
+        //Remove from bank
+        delete(scrapBankFiles[file]);
+    }
+//    try {
+//        var file = modFs.readFileSync(outputFile, "utf8");
+//        DICEUnitJson = DICEUnit.from(file);
+//
+//        //Assing data to real bject
+//        DICEUnit.addrOperator = DICEUnitJson.addrOperator;
+//        DICEUnit.addrMiner = DICEUnitJson.addrMiner;
+//        DICEUnit.validZeros = DICEUnitJson.validZeros;
+//        DICEUnit.swatchTime = DICEUnitJson.swatchTime;
+//        DICEUnit.payLoad = DICEUnitJson.payLoad;
+//
+//        modFs.unlink(outputFile, function (error) {
+//            if (error) {
+//                throw error;
+//            }
+//        });
+//    } catch (e)
+//    {
+//        //Nothing
+//    }
+//    return DICEUnit;
+}
+
 function _GetSHA3OfValidUnit(DICEUnit, sha3, counter, type) {
     var DICEPrototypeL = new modDICEPrototype();
     var SHA_PayLoad = "";
@@ -320,7 +451,7 @@ function _GetSHA3OfValidUnit(DICEUnit, sha3, counter, type) {
     SHA_PayLoad = _CalculateSHA3_512(DICEUnit.payLoad, sha3, counter, type);
     DICEPrototypeL.setSHA3PayLoad(SHA_PayLoad);
 
-    return _GetSHA3OfValidPrototype(DICEPrototypeL, sha3, counter,type);
+    return _GetSHA3OfValidPrototype(DICEPrototypeL, sha3, counter, type);
 }
 
 function _GetSHA3OfValidPrototype(DICEProto, sha3, counter, type) {
