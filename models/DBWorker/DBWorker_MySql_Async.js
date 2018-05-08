@@ -161,7 +161,7 @@ _Method.getCurrentOwner = function (hashOfProto, finishCallback) {
     var dataSql = `SELECT * FROM ${this.table} WHERE ${cDB_Table_Columns.hash.name}="${hashOfProto}" `;
     var connection = this.connection;
     connection.query(dataSql, returnData);
-
+    
     //Get CurOwner
     function returnData(err, res, fie) {
         try {

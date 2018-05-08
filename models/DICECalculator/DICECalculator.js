@@ -312,47 +312,32 @@ function _CalculateDICEUnitCUDA_Scrapping(addrOp, addrMin, validZeros, globalTh,
     var DICEUnit = new modDICEUnit();
     var DICEUnitJson = new modDICEUnit();
     var DICEUnitScrap = new modDICEUnit();
-    globalTh = 34;
-    modChild_process.execFile(cudaAppPath,
+    var cudaApp = spawn(cudaAppPath,
             [
                 outputFile,
                 addrOp,
                 addrMin,
                 _byteToHex(validZeros.toString()),
                 _byteToHex(globalTh.toString())
-            ],
-            {stdio: ['pipe', process.stdout, process.stderr]});
+            ]);
+
+    cudaApp.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+    });
+
+//    modChild_process.execFile(cudaAppPath,
+//            [
+//                outputFile,
+//                addrOp,
+//                addrMin,
+//                _byteToHex(validZeros.toString()),
+//                _byteToHex(globalTh.toString())
+//            ],
+//            {stdio: ['pipe', process.stdout, process.stderr]});
 
     var scrapBankFiles = {};
 
-    //Wait to generate new unit and check periodically for "scrapped" units
-//    while (true)
-//    {
-//        modFs.readdirSync("./").forEach(file => {
-//            if (file.indexOf("dicescr") !== -1 && !scrapBankFiles.hasOwnProperty(file)) {
-//                scrapBankFiles[file] = modFs.readFileSync(file, "utf8");
-//                DICEUnitJson = DICEUnitScrap.from(scrapBankFiles[file]);
-//                
-//                //Assing data to real bject
-//                DICEUnitScrap.addrOperator = DICEUnitJson.addrOperator;
-//                DICEUnitScrap.addrMiner = DICEUnitJson.addrMiner;
-//                DICEUnitScrap.validZeros = DICEUnitJson.validZeros;
-//                DICEUnitScrap.swatchTime = DICEUnitJson.swatchTime;
-//                DICEUnitScrap.payLoad = DICEUnitJson.payLoad;
-//
-//                diceScrapCallback(DICEUnitScrap);
-//            }
-//        });
-//
-//        try {
-//    var file = modFs.readFileSync(outputFile, "utf8");
-//            break;
-//        } catch (e) {
-//
-//        }
-//    }
-//    
-    // Example when handled through fs.watch() listener
+    //Directory Watcher
     var fsWatch = modFs.watch('./', {encoding: 'utf8'}, () => {
         modFs.readdirSync("./").forEach(file => {
             if (file.indexOf("dicescr") !== -1 && !scrapBankFiles.hasOwnProperty(file)) {
@@ -417,27 +402,6 @@ function _CalculateDICEUnitCUDA_Scrapping(addrOp, addrMin, validZeros, globalTh,
         //Remove from bank
         delete(scrapBankFiles[file]);
     }
-//    try {
-//        var file = modFs.readFileSync(outputFile, "utf8");
-//        DICEUnitJson = DICEUnit.from(file);
-//
-//        //Assing data to real bject
-//        DICEUnit.addrOperator = DICEUnitJson.addrOperator;
-//        DICEUnit.addrMiner = DICEUnitJson.addrMiner;
-//        DICEUnit.validZeros = DICEUnitJson.validZeros;
-//        DICEUnit.swatchTime = DICEUnitJson.swatchTime;
-//        DICEUnit.payLoad = DICEUnitJson.payLoad;
-//
-//        modFs.unlink(outputFile, function (error) {
-//            if (error) {
-//                throw error;
-//            }
-//        });
-//    } catch (e)
-//    {
-//        //Nothing
-//    }
-//    return DICEUnit;
 }
 
 function _GetSHA3OfValidUnit(DICEUnit, sha3, counter, type) {

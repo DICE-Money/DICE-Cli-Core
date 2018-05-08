@@ -28,7 +28,7 @@
 //Required
 const modNet = require('net');
 const modCluster = require('cluster');
-/* javascript-obfuscator:enable */
+
 
 //Class access 
 var _Method = TcpWorker.prototype;
@@ -40,6 +40,8 @@ const cEndOfBuffer = '#';
 const cCommandSeparator = '@';
 const cDataBufferSeparator = ':';
 const cNumCPUs = require('os').cpus().length;
+
+/* javascript-obfuscator:enable */
 
 //Constructor
 function TcpWorker() {
@@ -187,7 +189,8 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
         } else {
             this.worker.type = 'server';
             this.worker.instance = createServer(ip, port);
-
+            require('events').EventEmitter.prototype._maxListeners = cMaxListenrs;
+            
             //Save commands for server 
             this.commands = commandsOrCallback;
 
