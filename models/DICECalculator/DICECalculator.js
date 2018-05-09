@@ -312,28 +312,16 @@ function _CalculateDICEUnitCUDA_Scrapping(addrOp, addrMin, validZeros, globalTh,
     var DICEUnit = new modDICEUnit();
     var DICEUnitJson = new modDICEUnit();
     var DICEUnitScrap = new modDICEUnit();
-    var cudaApp = spawn(cudaAppPath,
+    
+    modChild_process.execFile(cudaAppPath,
             [
                 outputFile,
                 addrOp,
                 addrMin,
                 _byteToHex(validZeros.toString()),
                 _byteToHex(globalTh.toString())
-            ]);
-
-    cudaApp.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-    });
-
-//    modChild_process.execFile(cudaAppPath,
-//            [
-//                outputFile,
-//                addrOp,
-//                addrMin,
-//                _byteToHex(validZeros.toString()),
-//                _byteToHex(globalTh.toString())
-//            ],
-//            {stdio: ['pipe', process.stdout, process.stderr]});
+            ],
+            {stdio: ['pipe', process.stdout, process.stderr]});
 
     var scrapBankFiles = {};
 
