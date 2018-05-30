@@ -27,7 +27,8 @@
 
 //Required
 const modFs = require('fs');
-const modHttp = require('https');
+const modCloud = require('../CloudRequester/CloudRequester');
+
 /* javascript-obfuscator:enable */
 
 //Class access 
@@ -35,11 +36,13 @@ var _Method = DNSBinder.prototype;
 
 //Local const
 const cDnsHttp = "./dns.json";
+const maxReq = 10;
 
 //Construtor
 function DNSBinder() {
     this.filePath = undefined;
     this.fileDB = {};
+    this.cloud = new modCloud(maxReq);
 }
 
 //Private Methods
@@ -99,42 +102,11 @@ _Method.readFromHttpServer = function (link, cb) {
     });
 };
 
-_Method.getGoogleDriveNewUrl = function (data) {
-    data = modFs.readFileSync(data).toString();
-    var httpsPosStart = data.indexOf("https");
-    var httpsPosEnd = data.indexOf("download", httpsPosStart);
-    var url = data.substr(httpsPosStart, (httpsPosEnd+"download".length) - httpsPosStart);
-    return url;
-
-};
-
 _Method.getGoogleDriveData = function (link, cb) {
-    var module = this;
-    var file = modFs.createWriteStream(cDnsHttp);
-    modHttp.get(link, function (response) {
-        response.pipe(file);
-        file.on('finish', function () {
-            //Close file
-            file.close();
-
-            //Read new link
-            var newUrl = module.getGoogleDriveNewUrl(cDnsHttp);
-
-            //Delete file
-            modFs.unlink(cDnsHttp, () => {
-                file = modFs.createWriteStream(cDnsHttp);
-                modHttp.get(newUrl, function (response) {
-                    response.pipe(file);
-                    file.on('finish', function () {
-                        file.close();
-                        module.initializeDB(cDnsHttp, "json");
-                        cb();
-                    });
-                });
-            });
-        });
+    this.cloud.getGoogleDriveData(link, (object) => {
+        modFs.writeFileSync(cDnsHttp,JSON.stringify(object));
+        cb();
     });
-
 };
 
 
