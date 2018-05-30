@@ -173,24 +173,31 @@ function dataCallbacks(tcpWorker, buffer, commands, view, onClientCloseCallback,
     }
 }
 //Public
-_Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, onClientCloseCallback) {
+_Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, onClientCloseCallback, cpuCount) {
     if ("server" === serverOrClient) {
         if (modCluster.isMaster) {
             console.log(`Master ${process.pid} is running`);
             require('events').EventEmitter.prototype._maxListeners = cMaxListenrs;
+            var cpuCountL = cNumCPUs;
+
+            if (cpuCount > 0 && cpuCount <= cNumCPUs) {
+                cpuCountL = cpuCount;
+            }
+
             // Fork workers.
-            for (let i = 0; i < cNumCPUs; i++) {
+            for (let i = 0; i < cpuCountL; i++) {
                 modCluster.fork();
             }
 
             modCluster.on('exit', (worker, code, signal) => {
                 console.log(`worker ${worker.process.pid} died`);
             });
+
         } else {
             this.worker.type = 'server';
             this.worker.instance = createServer(ip, port);
             require('events').EventEmitter.prototype._maxListeners = cMaxListenrs;
-            
+
             //Save commands for server 
             this.commands = commandsOrCallback;
 
