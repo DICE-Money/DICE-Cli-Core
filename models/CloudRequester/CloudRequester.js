@@ -59,6 +59,11 @@ _Method.getGoogleDriveData = function (link, cb) {
             internalBufferL += data;
         });
 
+        response.on('error', function (data) {
+            //Return error
+            cb(data);
+        });
+
         response.on('end', function () {
             try {
                 parsedObject = JSON.parse(internalBufferL);
@@ -76,7 +81,7 @@ _Method.getGoogleDriveData = function (link, cb) {
                     module.maxReqCounter--;
                 }
                 else{
-                    throw new Error("Cloud Request reach max execution counter! Check URL!");
+                    cb(new Error("Cloud Request reach max execution counter! Check URL!"));
                 }
             }
         });
