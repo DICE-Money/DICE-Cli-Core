@@ -52,6 +52,7 @@ _Method.getGoogleDriveData = function (link, cb) {
     var parsedObject = {};
     var module = this;
 
+
     modHttp.get(link, function (response) {
 
         response.on('data', function (data) {
@@ -73,19 +74,22 @@ _Method.getGoogleDriveData = function (link, cb) {
                 //Read new link
                 var newUrl = module.getGoogleDriveNewUrl(internalBufferL);
 
-                if (module.maxReqCounter > 0){
+                if (module.maxReqCounter > 0) {
                     //Recursive call
                     module.getGoogleDriveData(newUrl, cb);
-                    
+
                     //Decrement
                     module.maxReqCounter--;
-                }
-                else{
+                } else {
                     cb(new Error("Cloud Request reach max execution counter! Check URL!"));
                 }
             }
         });
+    }).on('error', function (data) {
+        //Return error
+        cb(data);
     });
+
 };
 
 
