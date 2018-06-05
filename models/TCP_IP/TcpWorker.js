@@ -191,6 +191,9 @@ _Method.create = function (serverOrClient, ip, port, commandsOrCallback, view, o
 
             modCluster.on('exit', (worker, code, signal) => {
                 console.log(`worker ${worker.process.pid} died`);
+                
+                //Restart operator worker
+                modCluster.fork();
             });
 
         } else {
