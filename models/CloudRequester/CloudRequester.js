@@ -52,43 +52,47 @@ _Method.getGoogleDriveData = function (link, cb) {
     var parsedObject = {};
     var module = this;
 
+    try {
+        modHttp.get(link, function (response) {
 
-    modHttp.get(link, function (response) {
+            response.on('data', function (data) {
+                //Read all data
+                internalBufferL += data;
+            });
 
-        response.on('data', function (data) {
-            //Read all data
-            internalBufferL += data;
-        });
+            response.on('error', function (data) {
+                //Return error
+                cb(data);
+            });
 
-        response.on('error', function (data) {
+            response.on('end', function () {
+                try {
+                    parsedObject = JSON.parse(internalBufferL);
+                    module.maxReqCounter = module.maxReqCounterSaved;
+                    cb(parsedObject);
+                } catch (NotAObject) {
+                    //Read new link
+                    var newUrl = module.getGoogleDriveNewUrl(internalBufferL);
+
+                    if (module.maxReqCounter > 0) {
+                        //Recursive call
+                        module.getGoogleDriveData(newUrl, cb);
+
+                        //Decrement
+                        module.maxReqCounter--;
+                    } else {
+                        cb(new Error("Cloud Request reach max execution counter! Check URL!"));
+                    }
+                }
+            });
+        }).on('error', function (data) {
             //Return error
             cb(data);
         });
-
-        response.on('end', function () {
-            try {
-                parsedObject = JSON.parse(internalBufferL);
-                module.maxReqCounter = module.maxReqCounterSaved;
-                cb(parsedObject);
-            } catch (NotAObject) {
-                //Read new link
-                var newUrl = module.getGoogleDriveNewUrl(internalBufferL);
-
-                if (module.maxReqCounter > 0) {
-                    //Recursive call
-                    module.getGoogleDriveData(newUrl, cb);
-
-                    //Decrement
-                    module.maxReqCounter--;
-                } else {
-                    cb(new Error("Cloud Request reach max execution counter! Check URL!"));
-                }
-            }
-        });
-    }).on('error', function (data) {
+    } catch (ex) {
         //Return error
-        cb(data);
-    });
+        cb(ex);
+    }
 
 };
 
