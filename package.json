@@ -6,7 +6,11 @@
     "functional",
     "server",
     "client",
-    "browser"
+    "browser",
+    "DICE-Money",
+    "crypto",
+    "Social",
+    "Mining"
   ],
   "author": "Mihail Maldzhanski",
   "contributors": [],
