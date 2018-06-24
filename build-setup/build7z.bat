@@ -6,17 +6,20 @@ del sources.txt
 set deliveryFolder="./dist/*"
 set zip="C:\Program Files\7-Zip\7z.exe"
 
-set /p verison="Delivery verion select(example: 1.00) "
+set /p version="Delivery verion select(example: 1.00) "
 set /p label="Delivery main changes/label(example: Scrapping) "
+echo %label% | tr ' ' '_' > buf.txt
+set /p modLabel=<buf.txt
+del buf.txt
 
 echo ##############################
 echo # ARCHIVING DELIVERY VERSION #
 echo ##############################
-%zip% a -t7z -r Delivery_%1.7z %deliveryFolder%
+%zip% a -t7z -r Delivery_%version%.7z %deliveryFolder%
 
 echo ##############################
 echo #      ARCHIVING SOURCES     #
 echo ##############################
-%zip% a -t7z -r EncryptionNodeJS_%1.7z %sourcesFolder%
+%zip% a -t7z -r EncryptionNodeJS_%version%_%modLabel%.7z %sourcesFolder%
 
 pause
