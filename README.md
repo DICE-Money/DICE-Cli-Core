@@ -37,7 +37,7 @@ As regular NodeJS application, you will need to install all required packages.
  
 Clone repository or download zip
 ```
-git clone https://github.com/DICE-Money/DICE-Cli-Core.git
+git clone --recurse-submodules -j8 https://github.com/DICE-Money/DICE-Cli-Core.git
 ```
  
 Install application
