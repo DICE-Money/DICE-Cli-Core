@@ -1,7 +1,7 @@
 # DICE Money Cli  
 
 The Social Mining Protocol
-DICE is a cryptocurrency, the basis of a revolutionary new model of social economy. https://dice.money 
+DICE is a cryptocurrency, the basis of a revolutionary new model of social economy. [DICE.Money](https://dice.money)
  
 The current project is a NodeJS Application.     
 
@@ -22,7 +22,7 @@ What things you need to install the software and how to install them
 5. Mocha and mochawesome packages installed as global packages. 
 
 ```
-Go to https://nodejs.org and download NodeJS Engine.
+Go to [NodeJS](https://nodejs.org) and download NodeJS Engine.
 Recomended version: 8.9.x (LTS)
 
 Install NodeJS 
@@ -30,7 +30,7 @@ Install NodeJS
 
 ```
 [optional] Only for building of project  
-Go to http://mingw.org and download installer.
+Go to [MinGW](http://mingw.org) and download installer.
 
 Install basic setup of GNU packages.
 ```
@@ -49,20 +49,21 @@ Install application
 ```
 cd ~/DICE-Cli-Core 
 npm install  
-
+```
 or 
-
+```
 Install.bat
 ```
 
 [optional] Install global packages 
 ```
-npm -i -g nexe
-npm -i -g mocha
-npm -i -g mochawesome
+ 
 ```
-
-To verify installation go to ~/DICE-Cli-Core/Apps/Miner and run node index.js -ver
+To verify installation go to Miner folder
+```
+cd ~/DICE-Cli-Core/Apps/Miner
+node index.js -ver
+```
 
 ## Authors
 
