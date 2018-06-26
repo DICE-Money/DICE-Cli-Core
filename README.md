@@ -15,25 +15,20 @@ What things you need to install the software and how to install them
  
 1. You will need to have installed NodeJS Engine on your computer.
 2. Also it's required to have npm packege managment system locally.
+3. [optional]  MinGW for Windows machines.
+4. [optional]  Nexe package installed as global package.
+5. [optional]  Mocha and mochawesome packages installed as global packages. 
 
-[optional]  
-3. MinGW for Windows machines.
-4. Nexe package installed as global package.
-5. Mocha and mochawesome packages installed as global packages. 
 
-```
 Go to [NodeJS](https://nodejs.org) and download NodeJS Engine.
 Recomended version: 8.9.x (LTS)
 
 Install NodeJS 
-```
-
-```
+ 
 [optional] Only for building of project  
 Go to [MinGW](http://mingw.org) and download installer.
 
 Install basic setup of GNU packages.
-```
  
 
 ### Installing
