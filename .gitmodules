@@ -1,0 +1,6 @@
+[submodule "Apps\\Miner"]
+	path = Apps\\Miner
+	url = https://github.com/DICE-Money/DICE-Cli-Miner.git
+[submodule "3rd-modified\\elliptic"]
+	path = 3rd-modified\\elliptic
+	url = https://github.com/pollarize/elliptic.git

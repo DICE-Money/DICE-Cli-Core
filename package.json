@@ -13,7 +13,9 @@
     "Mining"
   ],
   "author": "Mihail Maldzhanski <pollarize@gmail.com>",
-  "contributors": ["Mihail Maldzhanski <pollarize@gmail.com>"],
+  "contributors": [
+    "Mihail Maldzhanski <pollarize@gmail.com>"
+  ],
   "dependencies": {
     "big-integer": "^1.6.26",
     "bs58": "^4.0.1",
