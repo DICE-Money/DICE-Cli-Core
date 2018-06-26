@@ -52,7 +52,9 @@ Install.bat
 
 [optional] Install global packages 
 ```
- 
+npm -i -g nexe
+npm -i -g mocha
+npm -i -g mochawesome  
 ```
 To verify installation go to Miner folder
 ```
