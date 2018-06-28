@@ -45,8 +45,9 @@ git clone --recurse-submodules https://github.com/DICE-Money/DICE-Cli-Core.git
 or
 ```
 git clone https://github.com/DICE-Money/DICE-Cli-Core.git
-git submodule add https://github.com/DICE-Money/DICE-Cli-Miner.git Apps/Miner
-git submodule add https://github.com/pollarize/elliptic.git 3rd-modified/elliptic
+cd ~/DICE-Cli-Core
+git clone https://github.com/DICE-Money/DICE-Cli-Miner.git Apps/Miner
+git clone https://github.com/pollarize/elliptic.git 3rd-modified/elliptic
 ```
 
 Install application
