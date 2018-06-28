@@ -1,7 +1,10 @@
 # DICE Money Cli  
 
+[![CodeFactor](https://www.codefactor.io/repository/github/dice-money/dice-cli-core/badge)](https://www.codefactor.io/repository/github/dice-money/dice-cli-core)
+
 The Social Mining Protocol
-DICE is a cryptocurrency, the basis of a revolutionary new model of social economy. [DICE.Money](https://dice.money)
+DICE is a cryptocurrency, the basis of a revolutionary new model of social economy. 
+[DICE.Money](https://dice.money)
  
 The current project is a NodeJS Application.     
 
@@ -37,7 +40,7 @@ As regular NodeJS application, you will need to install all required packages.
  
 Clone repository or download zip
 ```
-git clone --recurse-submodules -j8 https://github.com/DICE-Money/DICE-Cli-Core.git
+git clone --recurse-submodules https://github.com/DICE-Money/DICE-Cli-Core.git
 ```
  
 Install application
