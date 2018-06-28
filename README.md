@@ -42,7 +42,13 @@ Clone repository or download zip
 ```
 git clone --recurse-submodules https://github.com/DICE-Money/DICE-Cli-Core.git
 ```
- 
+or
+```
+git clone https://github.com/DICE-Money/DICE-Cli-Core.git
+git submodule add https://github.com/DICE-Money/DICE-Cli-Miner.git Apps/Miner
+git submodule add https://github.com/pollarize/elliptic.git 3rd-modified/elliptic
+```
+
 Install application
 ```
 cd ~/DICE-Cli-Core 
