@@ -8,12 +8,11 @@ before_install:
   - npm install -g mochawesome
   
  before_scipt:
-  - cd Apps//Miner//test//functional-test
+  - cd  
   
 script:
-  - mocha generalTest.js --reporter mochawesome
+  - mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome
 
- 
 cache:
   directories:
     - "node_modules"
