@@ -6,12 +6,6 @@ before_install:
   - npm install -g nexe
   - npm install -g mocha  
   - npm install -g mochawesome
-  
- before_scipt:
-  - cd  
-  
-script:
-  - mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome
 
 cache:
   directories:
