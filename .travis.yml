@@ -3,13 +3,10 @@ node_js:
  - "8"
 
 before_install:
+  - npm install  
   - npm install -g nexe
   - npm install -g mocha  
   - npm install -g mochawesome
   
 before_script:
   - ls -l
-  
-cache:
-  directories:
-    - "node_modules"
