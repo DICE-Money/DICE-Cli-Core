@@ -28,7 +28,7 @@
 //Required 3rd-party libraries
 const modCrypto = require('crypto');
 //Temporary disabled
-const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
+//const modSHA3_C = require('../../models/SHA-3_C/build/Release/sha3_C_Addon');
 const modSHA3 = require('js-sha3');
 const modSwatchTimer = require('../SwatchBeats/SwatchTimer.js');
 const modDICEUnit = require('./DICEUnit.js');
