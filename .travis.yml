@@ -6,7 +6,7 @@ before_install:
   - npm install -g nexe
   - npm install -g mocha  
   - npm install -g mochawesome
-  - ls -l
+  - cd DICE-Cli-Core
 
 cache:
   directories:
