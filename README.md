@@ -71,6 +71,10 @@ npm -i -g mochawesome
 ```
 To verify installation go to Miner folder
 ```
+npm test
+```
+or  
+```
 cd ~/DICE-Cli-Core/Apps/Miner
 node index.js -ver
 ```
