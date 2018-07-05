@@ -15,6 +15,9 @@ The current project is a NodeJS Application.
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+## Software Archutecture Overview
+![SW Overview](https://github.com/DICE-Money/DICE-Cli-Core/blob/development/architecture/exported_diagrams/GeneralDeploymentDiagram.png?raw=true)
+
 ### Prerequisites
 
 What things you need to install the software and how to install them
@@ -69,11 +72,12 @@ npm -i -g nexe
 npm -i -g mocha
 npm -i -g mochawesome  
 ```
-To verify installation go to Miner folder
+
+To verify installation run
 ```
 npm test
 ```
-or  
+or go to Miner folder and execute Miner application
 ```
 cd ~/DICE-Cli-Core/Apps/Miner
 node index.js -ver
