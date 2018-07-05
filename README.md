@@ -15,7 +15,7 @@ The current project is a NodeJS Application.
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-## Software Archutecture Overview
+## Software Architecture Overview
 ![SW Overview](https://github.com/DICE-Money/DICE-Cli-Core/blob/development/architecture/exported_diagrams/GeneralDeploymentDiagram.png?raw=true)
 
 ### Prerequisites
