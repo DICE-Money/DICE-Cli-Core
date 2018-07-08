@@ -8,6 +8,9 @@ git clone https://github.com/pollarize/elliptic.git 3rd-modified/elliptic
 
 npm install
 
+cd ./3rd-modified/elliptic
+npm install
+
 npm -i -g nexe
 npm -i -g mocha
 npm -i -g mochawesome 
