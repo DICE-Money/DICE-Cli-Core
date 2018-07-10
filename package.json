@@ -29,7 +29,7 @@
   },
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
-    "test": "mocha Apps//Miner//test//functional-test//generalTest.js ./Models/AmountWorker/test.js --reporter mochawesome"
+    "test": "mocha Apps//Miner//test//functional-test//generalTest.js ./models/AmountWorker/test.js --reporter mochawesome"
   },
   "devDependencies": {
     "javascript-obfuscator": "^0.14.3",
