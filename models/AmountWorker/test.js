@@ -36,8 +36,8 @@ describe("Test Amount worker", function () {
                 513,
                 75,
                 120,
-                121, 
-                127, 
+                121,
+                127,
                 129,
                 1546,
                 5096
@@ -85,9 +85,14 @@ describe("Test Amount worker", function () {
 
             sum = sum * 1024;
 
+            //Cconsole
             console.log('Amount collected', sum);
             console.log(result);
 
+            //Add return data from execution
+            addContext(this, {title: 'Amount collected', value: sum});
+            addContext(this, {title: 'Names of units', value: result});
+            
             if (sum < target) {
                 throw new Error("Invalid sum");
             }
