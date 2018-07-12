@@ -178,5 +178,9 @@ _Method.IsValidAddress = function (addr) {
     return isValid;
 };
 
+_Method.GetDALength = function () {
+    return cLenghtOfAddr;
+};
+
 // export the class
 module.exports = DigitalAdressCalculator;
