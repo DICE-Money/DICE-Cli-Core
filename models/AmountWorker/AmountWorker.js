@@ -19,7 +19,6 @@
 
 //Required
 const modBS58 = require('bs58');
-
 /* javascript-obfuscator:enable */
 
 
@@ -35,41 +34,64 @@ function AmountWorker() {
 _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
     var intCurIndex = 0;
     var flCurAmount = 0.0;
-    var intLasAddedIndex = 0;
+    var intLasAddedIndex = undefined;
     var arUnits = [];
     var flTargetAmountL = flTargetAmount / 1024;
+    var arUnitsLastReached = [];
+    var intStaringIndex = 1;
 
     // 1. Sort array of units - Bigger -> Smaller
     var arObjUnitsDataList_Sorted = arObjUnitsDataList.sort(function (first, second) {
-        return first.value < second.value;
+        return second.value - first.value;
     });
 
-    // 2,3 Execute 
-    do {
-        //Check if the sum overlaps and exchange last with the smallest one
-        if (flCurAmount > flTargetAmountL && 
-                arObjUnitsDataList_Sorted[intLasAddedIndex].value > arObjUnitsDataList_Sorted[intCurIndex].value) {
-            arUnits.pop();
-            flCurAmount -= arObjUnitsDataList_Sorted[intLasAddedIndex].value;
-        } else {
-            //Add only proper members
-            if (arObjUnitsDataList_Sorted[intCurIndex].value < flTargetAmountL) {
-                intLasAddedIndex = intCurIndex;
-                arUnits.push(arObjUnitsDataList_Sorted[intCurIndex].name);
-                flCurAmount += arObjUnitsDataList_Sorted[intCurIndex].value;
+    // 2,3,4 Execute 
+    for (var unit of arObjUnitsDataList) {
+        if (flCurAmount > flTargetAmountL) {
+            //Save last achievied sum
+            arUnitsLastReached = JSON.parse(JSON.stringify(arUnits));
+            if (arObjUnitsDataList_Sorted[intLasAddedIndex].value > unit.value
+                    //Check for diviation 
+                    && ((flCurAmount
+                            - arObjUnitsDataList_Sorted[intLasAddedIndex].value)
+                            + unit.value) < flCurAmount) {
+                arUnits.pop();
+                flCurAmount -= arObjUnitsDataList_Sorted[intLasAddedIndex].value;
             }
         }
-        intCurIndex++;
-    } while (intCurIndex < arObjUnitsDataList_Sorted.length);
 
-    console.log(flCurAmount * 1024, flTargetAmountL);
+        //Add only members which are smaller
+        if (flCurAmount < flTargetAmountL && unit.value <= flTargetAmountL) {
+            if (flCurAmount === 0.0 && intCurIndex > 0) {
+                intStaringIndex = intCurIndex;
+            }
+            intLasAddedIndex = intCurIndex;
+            arUnits.push(unit.name);
+            flCurAmount += unit.value;
+        }
+
+        //Terminate on exact sum
+        if (flCurAmount === flTargetAmountL) {
+            break;
+        }
+
+        intCurIndex++;
+    }
+
+    if (flCurAmount < flTargetAmountL) {
+        //Situation when counting to end doesnt work
+        if (arUnitsLastReached.length > 1) {
+            arUnits = arUnitsLastReached;
+        } else {
+            //Situation when starting unit is a whole unit and its not possible to sum other
+            arUnits = [];
+            arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex - 1].name);
+        }
+    }
 
     return arUnits;
 };
-
 _Method.decodeAmount = function (objUnitsDataList) {
 
 };
-
-
 module.exports = AmountWorker;
