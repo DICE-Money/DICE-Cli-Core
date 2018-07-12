@@ -19,12 +19,16 @@
 
 //Required
 const modBS58 = require('bs58');
+const modDA_Worker = require('../AddressCalculator/DigitalAdressCalculator_ECDH.js');
+
 /* javascript-obfuscator:enable */
 
 
 //Class access 
 var _Method = AmountWorker.prototype;
+
 //Local const
+const cDigitalAddressLength = new modDA_Worker().GetDALength();
 
 function AmountWorker() {
     //Nothing
@@ -38,18 +42,29 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
     var arUnits = [];
     var flTargetAmountL = flTargetAmount / 1024;
     var arUnitsLastReached = [];
+    var flAmountLastReached = 0.0;
     var intStaringIndex = 1;
 
+    // 0. Remove units without owner
+    var arObjUnitsDataList_Owner = [];
+    for (var unit of arObjUnitsDataList) {
+        if (unit.owner !== undefined && unit.owner.length === cDigitalAddressLength) {
+            arObjUnitsDataList_Owner.push(unit);
+        }
+    }
+
     // 1. Sort array of units - Bigger -> Smaller
-    var arObjUnitsDataList_Sorted = arObjUnitsDataList.sort(function (first, second) {
+    var arObjUnitsDataList_Sorted = arObjUnitsDataList_Owner.sort(function (first, second) {
         return second.value - first.value;
     });
 
     // 2,3,4 Execute 
-    for (var unit of arObjUnitsDataList) {
+    for (var unit of arObjUnitsDataList_Sorted) {
+
         if (flCurAmount > flTargetAmountL) {
             //Save last achievied sum
             arUnitsLastReached = JSON.parse(JSON.stringify(arUnits));
+            flAmountLastReached = flCurAmount;
             if (arObjUnitsDataList_Sorted[intLasAddedIndex].value > unit.value
                     //Check for diviation 
                     && ((flCurAmount
@@ -81,17 +96,26 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
     if (flCurAmount < flTargetAmountL) {
         //Situation when counting to end doesnt work
         if (arUnitsLastReached.length > 1) {
+            flCurAmount = flAmountLastReached;
             arUnits = arUnitsLastReached;
         } else {
             //Situation when starting unit is a whole unit and its not possible to sum other
             arUnits = [];
-            arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex - 1].name);
+            flCurAmount = 0.0;
+            if (arObjUnitsDataList_Sorted.length > 0 &&
+                    arObjUnitsDataList_Sorted[intStaringIndex - 1].value >= flTargetAmountL) {
+                flCurAmount = arObjUnitsDataList_Sorted[intStaringIndex - 1].value;
+                arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex - 1].name);
+            }
         }
     }
 
-    return arUnits;
+    return {units: arUnits, amount: flCurAmount};
 };
+
+
 _Method.decodeAmount = function (objUnitsDataList) {
 
 };
+
 module.exports = AmountWorker;
