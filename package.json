@@ -19,7 +19,7 @@
   "dependencies": {
     "big-integer": "^1.6.26",
     "bs58": "^4.0.1",
-    "elliptic": "^6.4.0",
+    "elliptic": "file:3rd-modified/elliptic",
     "js-sha3": "^0.6.1",
     "key-encoder": "^1.1.6",
     "mocha": "^5.1.1",
