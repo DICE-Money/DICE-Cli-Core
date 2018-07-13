@@ -104,18 +104,18 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
             flCurAmount = 0.0;
 
             //The statment satisfy unproper suggestion of bigger unit 
-            if (arObjUnitsDataList_Sorted.length > 0)
+            if (arObjUnitsDataList_Sorted.length > 0) {
                 if (arObjUnitsDataList_Sorted.length > 1 &&
                         arObjUnitsDataList_Sorted[intStaringIndex].value >= flTargetAmountL) {
                     flCurAmount = arObjUnitsDataList_Sorted[intStaringIndex].value;
                     arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex].name);
-                } else {
+                } else if (arObjUnitsDataList_Sorted[intStaringIndex - 1].value >= flTargetAmountL) {
                     flCurAmount = arObjUnitsDataList_Sorted[intStaringIndex - 1].value;
                     arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex - 1].name);
                 }
+            }
         }
     }
-
     return {units: arUnits, amount: flCurAmount};
 };
 
