@@ -108,7 +108,6 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
             if (arObjUnitsDataList_Sorted.length > 0) {
                 do {
                     objUnitL = arObjUnitsDataList_Sorted.pop();
-                    console.log(JSON.stringify(objUnitL));
                 } while (arObjUnitsDataList_Sorted.length > 0 && objUnitL.value <= flTargetAmountL);
 
                 if (objUnitL.value >= flTargetAmountL) {
