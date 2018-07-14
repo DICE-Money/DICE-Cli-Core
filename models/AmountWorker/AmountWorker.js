@@ -18,14 +18,15 @@
 /* javascript-obfuscator:disable */
 
 //Required
-const modBS58 = require('bs58');
 const modDA_Worker = require('../AddressCalculator/DigitalAdressCalculator_ECDH.js');
+const modBS58 = require('../Base58/Base58.js');
+const modFs = require('fs');
 
 /* javascript-obfuscator:enable */
 
-
 //Class access 
 var _Method = AmountWorker.prototype;
+var Bs58 = new modBS58();
 
 //Local const
 const cDigitalAddressLength = new modDA_Worker().GetDALength();
@@ -119,8 +120,36 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
     return {units: arUnits, amount: flCurAmount};
 };
 
+_Method.packUnits = function (objAmountReaturnData, encryptor, AddressGen, strCurAddr, strTargetAddr) {
+    var arrUnitsContent = [];
 
-_Method.decodeAmount = function (objUnitsDataList) {
+    //Read allunits and store to array
+    for (var unitPath of objAmountReaturnData.units) {
+        arrUnitsContent.push(modFs.readFileSync(unitPath, "utf-8"));
+    }
+
+    //Decide to encrypt
+    if (strTargetAddr !== undefined) {
+        //Encrypt unit which is in BS58 with new owner address
+        var encData = encryptor.encryptFilePublicKey
+                (
+                        JSON.stringify(arrUnitsContent),
+                        Buffer.from(Bs58.decode(AddressGen.convertHexDashToBS58(strTargetAddr)))
+                        );
+
+        //Preapare data for storing
+        var fsData = {};
+        fsData['addr'] = strCurAddr;
+        fsData['units'] = encData;
+
+    } else {
+        var fsData = arrUnitsContent;
+    }
+
+    return Bs58.encode(JSON.stringify(fsData)).toString();
+};
+
+_Method.unPackUnits -= function () {
 
 };
 
