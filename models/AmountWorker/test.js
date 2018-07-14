@@ -143,7 +143,7 @@ describe("Test Amount worker", function () {
         var sum = result.amount * 1024;
 
         addContext(mochaContext, {title: 'Names of units in local bank (Before)', value: units});
-        console.log('Global units Before', units);
+//        console.log('Global units Before', units);
 
         for (var unitName of result.units) {
             for (var unit of units) {
@@ -154,12 +154,12 @@ describe("Test Amount worker", function () {
         }
 
         //Console
-        console.log('Global units After', units);
+//        console.log('Global units After', units);
         console.log('Amount collected', sum);
         console.log('Returned array', result.units);
 
         if (specialExpectation !== undefined) {
-            addContext(mochaContext, {title: `Special expectation of amount ${specialExpectation}`});
+            addContext(mochaContext, {title: `Special expectation of amount ${specialExpectation}`,value: null});
         }
 
         //Add return data from execution

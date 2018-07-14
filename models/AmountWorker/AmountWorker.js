@@ -104,14 +104,21 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
             arUnits = [];
             flCurAmount = 0.0;
             var objUnitL = {};
-            
-            if (arObjUnitsDataList_Sorted.length >0){
-                do{
+
+            if (arObjUnitsDataList_Sorted.length > 0) {
+                do {
                     objUnitL = arObjUnitsDataList_Sorted.pop();
-                }while(arObjUnitsDataList_Sorted.length > 0 && objUnitL.value < flTargetAmountL);
-                arUnits.push(objUnitL.name);
-                flCurAmount= objUnitL.value;
+                    console.log(JSON.stringify(objUnitL));
+                } while (arObjUnitsDataList_Sorted.length > 0 && objUnitL.value <= flTargetAmountL);
+
+                if (objUnitL.value >= flTargetAmountL) {
+                    arUnits.push(objUnitL.name);
+                    flCurAmount = objUnitL.value;
+                }else{
+                    // No unit found
+                }
             }
+        }
     }
     return {units: arUnits, amount: flCurAmount};
 };
@@ -133,7 +140,7 @@ _Method.packUnits = function (objAmountReaturnData, encryptor, AddressGen, strCu
                         Buffer.from(Bs58.decode(AddressGen.convertHexDashToBS58(strTargetAddr)))
                         );
 
-        //Preapare data for storing
+        //Pr  eapare data for storing
         var fsData = {};
         fsData['addr'] = strCurAddr;
         fsData['units'] = encData;
@@ -145,7 +152,7 @@ _Method.packUnits = function (objAmountReaturnData, encryptor, AddressGen, strCu
     return Bs58.encode(JSON.stringify(fsData)).toString();
 };
 
-_Method.unPackUnits -= function () {
+_Method.unPackUnits = function () {
 
 };
 
