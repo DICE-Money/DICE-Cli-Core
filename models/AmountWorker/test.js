@@ -96,7 +96,8 @@ describe("Test Amount worker", function () {
                 {name: "Tst_1/1024_1_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 1 / 1024},
                 {name: "Tst_2/1024_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 2 / 1024},
                 {name: "Tst_1/1024_2_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 1 / 1024},
-                {name: "Tst_4/1024_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 4 / 1024}
+                {name: "Tst_4/1024_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 4 / 1024},
+                {name: "Tst_8/1024_NEW", owner: "f87b0-31850-b97f9-835c9-9cb13-f91ce-43832-8537c", value: 8 / 1024}
             ];
 
     it(`Execute OWNERLESS encoding of units amount 1 mDICE FIRST time`, function () {
