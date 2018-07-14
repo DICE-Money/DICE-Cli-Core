@@ -102,19 +102,15 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
             //Situation when starting unit is a whole unit and its not possible to sum other
             arUnits = [];
             flCurAmount = 0.0;
-
-            //The statment satisfy unproper suggestion of bigger unit 
-            if (arObjUnitsDataList_Sorted.length > 0) {
-                if (arObjUnitsDataList_Sorted.length > 1 &&
-                        arObjUnitsDataList_Sorted[intStaringIndex].value >= flTargetAmountL) {
-                    flCurAmount = arObjUnitsDataList_Sorted[intStaringIndex].value;
-                    arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex].name);
-                } else if (arObjUnitsDataList_Sorted[intStaringIndex - 1].value >= flTargetAmountL) {
-                    flCurAmount = arObjUnitsDataList_Sorted[intStaringIndex - 1].value;
-                    arUnits.push(arObjUnitsDataList_Sorted[intStaringIndex - 1].name);
-                }
+            var objUnitL = {};
+            
+            if (arObjUnitsDataList_Sorted.length >0){
+                do{
+                    objUnitL = arObjUnitsDataList_Sorted.pop();
+                }while(arObjUnitsDataList_Sorted.length > 0 && objUnitL.value < flTargetAmountL);
+                arUnits.push(objUnitL.name);
+                flCurAmount= objUnitL.value;
             }
-        }
     }
     return {units: arUnits, amount: flCurAmount};
 };
