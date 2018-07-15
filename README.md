@@ -4,6 +4,8 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/dice-money/dice-cli-core/badge)](https://www.codefactor.io/repository/github/dice-money/dice-cli-core)
 [![Build Status](https://travis-ci.com/DICE-Money/DICE-Cli-Core.svg?branch=development)](https://travis-ci.com/DICE-Money/DICE-Cli-Core)
+[![Coverage Status](https://coveralls.io/repos/github/dobrevnikolay/DICE-Cli-Core/badge.svg?branch=development)](https://coveralls.io/github/dobrevnikolay/DICE-Cli-Core?branch=development)
+
 
 The Social Mining Protocol
 DICE is a cryptocurrency, the basis of a revolutionary new model of social economy. 
