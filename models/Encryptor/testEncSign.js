@@ -29,63 +29,117 @@ const secp160k1 = require('../AddressCalculator/Secp160k1.js');
 
 var digitalAdressWorker_160k1 = new secp160k1();
 
+describe("Test Encryption library", function () {
 
-for (var i = 0; i < 10000; i++) {
-//1. Set Static keys
-    digitalAdressWorker_160k1.genarateKeys();
-    var keysMiner = digitalAdressWorker_160k1.getKeyPair();
-    digitalAdressWorker_160k1.genarateKeys();
-    var keysOperator = digitalAdressWorker_160k1.getKeyPair();
+    it("Test Encryption of Data packet 10 times", function () {
+        for (var i = 0; i < 10; i++) {
+            //1. Set Static keys
+            digitalAdressWorker_160k1.genarateKeys();
+            var keysMiner = digitalAdressWorker_160k1.getKeyPair();
+            digitalAdressWorker_160k1.genarateKeys();
+            var keysOperator = digitalAdressWorker_160k1.getKeyPair();
 
-//2.1. Create Instance of encryptor (Miner side)
-    var enc_M = new modEncryptor(keysMiner,"general");
+            //2.1. Create Instance of encryptor (Miner side)
+            var enc_M = new modEncryptor(keysMiner, "general");
 
-//2.2. Create Instance of encryptor (Operator side)
-    var enc_O = new modEncryptor(keysOperator,"general");
+            //2.2. Create Instance of encryptor (Operator side)
+            var enc_O = new modEncryptor(keysOperator, "general");
 
-//3. Miner prepare signed and encrypted data to Operator
-//   Miner knows only public key !
-    console.time("Prepare Certificate");
-    var certificateMiner = enc_M.getKeyExchangeCertificate(keysOperator.public);
-    console.timeEnd("Prepare Certificate");
-    console.log("Miner Certificate:", JSON.stringify(certificateMiner));
+            //3. Miner prepare signed and encrypted data to Operator
+            //   Miner knows only public key !
+            console.time("Prepare Certificate");
+            var certificateMiner = enc_M.getKeyExchangeCertificate(keysOperator.public);
+            console.timeEnd("Prepare Certificate");
+            console.log("Miner Certificate:", JSON.stringify(certificateMiner));
 
-//4. Miner prepare signed and encrypted data to Operator
-//   Miner knows only public key !
-    var certificateOperator = enc_O.getKeyExchangeCertificate(keysMiner.public);
-    console.log("Operator Certificate:", JSON.stringify(certificateOperator));
+            //4. Miner prepare signed and encrypted data to Operator
+            //   Miner knows only public key !
+            var certificateOperator = enc_O.getKeyExchangeCertificate(keysMiner.public);
+            console.log("Operator Certificate:", JSON.stringify(certificateOperator));
 
-//5. Operator receives Certificate and try to accpet it
-//   Operator knows only public key
-    console.time("Accept Certificate");
-    var bigCertificate = enc_O.acceptKeyExchangeCertificate(certificateMiner, keysMiner.public);
-    console.timeEnd("Accept Certificate");
-    console.log("Operator accept certificate:", bigCertificate);
+            //5. Operator receives Certificate and try to accpet it
+            //   Operator knows only public key
+            console.time("Accept Certificate");
+            var bigCertificate = enc_O.acceptKeyExchangeCertificate(certificateMiner, keysMiner.public);
+            console.timeEnd("Accept Certificate");
+            console.log("Operator accept certificate:", bigCertificate);
 
-//6. Operator receives Certificate and try to accpet it
-//   Operator knows only public key
-    var bigCertificate = enc_M.acceptKeyExchangeCertificate(certificateOperator, keysOperator.public);
-    console.log("Miner accept certificate:", bigCertificate);
+            //6. Operator receives Certificate and try to accpet it
+            //   Operator knows only public key
+            var bigCertificate = enc_M.acceptKeyExchangeCertificate(certificateOperator, keysOperator.public);
+            console.log("Miner accept certificate:", bigCertificate);
 
-//7. Try to encrypt some data with new certificates (Miner)
-    var testString = "Hello Operator";
-    var encrypted_M = enc_M.encryptDataPublicKey(testString, keysOperator.public);
-    console.log("Miner encrypt message:", encrypted_M);
+            //7. Try to encrypt some data with new certificates (Miner)
+            var testString = "Hello Operator";
+            var encrypted_M = enc_M.encryptDataPublicKey(testString, keysOperator.public);
+            console.log("Miner encrypt message:", encrypted_M);
 
-//8. Try to decrypt some data with new certificates (Operator)
-    var decrypted_O = enc_O.decryptDataPublicKey(encrypted_M, keysMiner.public);
-    console.log("Operator decrypt message:", decrypted_O.toString("hex"));
+            //8. Try to decrypt some data with new certificates (Operator)
+            var decrypted_O = enc_O.decryptDataPublicKey(encrypted_M, keysMiner.public);
+            console.log("Operator decrypt message:", decrypted_O.toString("hex"));
 
-//9. Return reply to miner (Operator)
-    testString = "Hello Miner";
-    console.time("Encryption");
-    var encrypted_O = enc_O.encryptDataPublicKey(testString, keysMiner.public);
-    console.timeEnd("Encryption");
-    console.log("Operator encrypt message:", encrypted_O);
+            //9. Return reply to miner (Operator)
+            testString = "Hello Miner";
+            console.time("Encryption");
+            var encrypted_O = enc_O.encryptDataPublicKey(testString, keysMiner.public);
+            console.timeEnd("Encryption");
+            console.log("Operator encrypt message:", encrypted_O);
 
-//8. Try to decrypt some data with new certificates (Miner)
-    console.time("Decryption");
-    var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O, keysOperator.public);
-    console.timeEnd("Decryption");
-    console.log("Miner decrypt message:", decrypted_M.toString("hex"));
-}
+            //8. Try to decrypt some data with new certificates (Miner)
+            console.time("Decryption");
+            var decrypted_M = enc_M.decryptDataPublicKey(encrypted_O, keysOperator.public);
+            console.timeEnd("Decryption");
+            console.log("Miner decrypt message:", decrypted_M.toString("hex"));
+        }
+    });
+
+    it("Test Encryption of File 10 times", function () {
+        for (var i = 0; i < 10; i++) {
+            //1. Set Static keys
+            digitalAdressWorker_160k1.genarateKeys();
+            var keysMiner = digitalAdressWorker_160k1.getKeyPair();
+            digitalAdressWorker_160k1.genarateKeys();
+            var keysOperator = digitalAdressWorker_160k1.getKeyPair();
+
+            //2.1. Create Instance of encryptor (Miner(Sender) side)
+            var enc_M = new modEncryptor(keysMiner, "general");
+
+            //2.2. Create Instance of encryptor (Miner(Receiver) side)
+            var enc_O = new modEncryptor(keysOperator, "general");
+
+            //Skip 3,4,5,6 Because they are related to certificates
+
+            //7. Try to encrypt some data with new certificates (Miner)
+            var testString = "Hello Miner(Receiver)";
+            var encrypted_M = enc_M.encryptFilePublicKey(testString, keysOperator.public);
+            console.log("Miner(Sender) encrypt message:", encrypted_M);
+
+            //8. Try to decrypt some data with new certificates (Operator)
+            var decrypted_O = enc_O.decryptFilePublicKey(encrypted_M, keysMiner.public);
+            console.log("Miner(Receiver) decrypt message:", decrypted_O.toString("hex"));
+
+            // 8.1 Verify
+            if (decrypted_O.toString("hex") !== testString) {
+                throw new Error("Miner(Receiver) cannot decrypt data");
+            }
+
+            //9. Return reply to miner (Operator)
+            testString = "Hello Miner(Sender)";
+            console.time("Encryption");
+            var encrypted_O = enc_O.encryptFilePublicKey(testString, keysMiner.public);
+            console.timeEnd("Encryption");
+            console.log("Miner(Receiver) encrypt message:", encrypted_O);
+
+            //10. Try to decrypt some data with new certificates (Miner)
+            console.time("Decryption");
+            var decrypted_M = enc_M.decryptFilePublicKey(encrypted_O, keysOperator.public);
+            console.timeEnd("Decryption");
+            console.log("Miner(Sender) decrypt message:", decrypted_M.toString("hex"));
+
+            // 10.1 Verify
+            if (decrypted_M.toString("hex") !== testString) {
+                throw new Error("Miner(Sender) cannot decrypt data");
+            }
+        }
+    });
+});
