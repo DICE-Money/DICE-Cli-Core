@@ -31,8 +31,8 @@ var digitalAdressWorker_160k1 = new secp160k1();
 
 describe("Test Encryption library", function () {
 
-    it("Test Encryption of Data packet 10 times", function () {
-        for (var i = 0; i < 10; i++) {
+    it("Test Encryption of Data packet 2 times", function () {
+        for (var i = 0; i < 2; i++) {
             //1. Set Static keys
             digitalAdressWorker_160k1.genarateKeys();
             var keysMiner = digitalAdressWorker_160k1.getKeyPair();
@@ -93,8 +93,8 @@ describe("Test Encryption library", function () {
         }
     });
 
-    it("Test Encryption of File 10 times", function () {
-        for (var i = 0; i < 10; i++) {
+    it("Test Encryption of File 2 times", function () {
+        for (var i = 0; i < 2 ;i++) {
             //1. Set Static keys
             digitalAdressWorker_160k1.genarateKeys();
             var keysMiner = digitalAdressWorker_160k1.getKeyPair();
