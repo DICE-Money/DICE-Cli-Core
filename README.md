@@ -60,6 +60,9 @@ Install application
 ```
 cd ~/DICE-Cli-Core 
 npm install  
+
+cd ./3rd-modified/elliptic
+npm install
 ```
 or 
 ```
