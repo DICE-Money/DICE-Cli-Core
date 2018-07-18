@@ -30,10 +30,11 @@
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
     "test": "mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome",
-	"test-travis": ".//node_modules//istanbul//lib//cli.js cover .//node_modules//mocha//bin//_mocha -- -R spec Apps//Miner//test//functional-test//generalTest.js"
+    "test-travis": ".//node_modules//istanbul//lib//cli.js cover .//node_modules//mocha//bin//_mocha -- -R spec Apps//Miner//test//functional-test//generalTest.js"
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
+    "istanbul": "^0.4.5",
     "javascript-obfuscator": "^0.14.3",
     "mocha-lcov-reporter": "^1.3.0",
     "mochawesome": "^3.0.2",
