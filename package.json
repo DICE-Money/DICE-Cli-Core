@@ -30,7 +30,7 @@
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
     "test": "mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome",
-    "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha Apps//Miner//test//functional-test//generalTest.js"
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha Apps//Miner//test//functional-test//generalTest.js"
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
