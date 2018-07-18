@@ -29,8 +29,8 @@
   },
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
-    "test": "mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome"
-	"test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec Apps//Miner//test//functional-test//generalTest.js"
+    "test": "mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome",
+	"test-travis": ".//node_modules//istanbul//lib//cli.js cover .//node_modules//mocha//bin//_mocha -- -R spec Apps//Miner//test//functional-test//generalTest.js"
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
