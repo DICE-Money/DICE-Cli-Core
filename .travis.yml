@@ -11,8 +11,5 @@ before_install:
 before_script:
   - ls -l
   
-after_script: 
-    - ./node_modules/karma/bin/karma start
-    - istanbul cover ./node_modules/mocha/bin/_mocha server/api/**/*.spec.js
-    - cat ./coverage/lcov.info ./coverage/karma/**/*.info > lcov.info 
-    - node node_modules/lcov-filter/index.js lcov.info config | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+# Send coverage data to Coveralls
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
