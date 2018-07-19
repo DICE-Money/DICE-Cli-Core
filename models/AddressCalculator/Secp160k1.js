@@ -18,7 +18,7 @@
 
 //Required
 const modCrypto = require('crypto');
-const modEc = require('../../3rd-modified/elliptic/lib/elliptic.js').ec;
+const modEc = require('elliptic').ec;
 /* javascript-obfuscator:enable */
 
 //Class access 
