@@ -89,19 +89,6 @@ ifeq ($(TARGET), all)
 	nexe -i ./$(APPS_FOLDER)/Miner/index.js -t linux-x32-$(NODE_VERSION) -o ./$(BUILD_FOLDER)/$(MI_FOLDER)/Linux/Miner_x86
 endif
 
-ifeq ($(TARGET), armRemote)
-	scp -P $(ARM32PORT) -r "./$(APPS_FOLDER)" "./models" "./view" $(ARM32):$(DEST_FOLDER)DICE/EncryptionNodeJS
-	ssh -p $(ARM32PORT) $(ARM32) -t -t "su -l; $(DEST_FOLDER)DICE/EncryptionNodeJS/BUILD/Miner_Build/Linux_arm/Miner_x86 -ver"
-	scp -P $(ARM32PORT) -r $(ARM32):$(DEST_FOLDER)DICE/EncryptionNodeJS/BUILD ./
-
-	scp -P $(ARM64PORT) -r "./$(APPS_FOLDER)" "./models" "./view" $(ARM64):$(DEST_FOLDER)EncryptionNodeJSSources
-	ssh -p $(ARM64PORT) $(ARM64) -t -t "cd $(DEST_FOLDER)/EncryptionNodeJSSources; ./build_x64.sh; npm link ./3rd-modified/elliptic; ./BUILD/Miner_Build/Linux_arm/Miner -ver"
-	scp -P $(ARM64PORT) -r $(ARM64):$(DEST_FOLDER)EncryptionNodeJSSources/BUILD ./
-	
-	ls -l ./$(BUILD_FOLDER)/$(OP_FOLDER)/Linux_arm 
-	ls -l ./$(BUILD_FOLDER)/$(MI_FOLDER)/Linux_arm	
-endif
-
 ifeq ($(TARGET), arm)
 ifeq ($(BIT), x86)
     nexe --build -i ./Apps/Miner/index.js  -o ./BUILD/Miner_Build/Linux_arm/Miner_x86
@@ -109,9 +96,23 @@ else
     nexe --build -i ./Apps/Miner/index.js  -o ./BUILD/Miner_Build/Linux_arm/Miner
 endif
 endif
+
+buildRemoteArm:
+	scp -P $(ARM32PORT) -r "./$(APPS_FOLDER)" "./models" "./view" $(ARM32):$(DEST_FOLDER)DICE/EncryptionNodeJS
+	ssh -p $(ARM32PORT) $(ARM32) -t -t "su -l; $(DEST_FOLDER)DICE/EncryptionNodeJS/BUILD/Miner_Build/Linux_arm/Miner_x86 -ver"
+	scp -P $(ARM32PORT) -r $(ARM32):$(DEST_FOLDER)DICE/EncryptionNodeJS/BUILD ./
+
+	scp -P $(ARM64PORT) -r "./$(APPS_FOLDER)" "./models" "./view" $(ARM64):$(DEST_FOLDER)EncryptionNodeJSSources
+	ssh -p $(ARM64PORT) $(ARM64) -t -t "cd $(DEST_FOLDER)/EncryptionNodeJSSources; ./build_x64.sh; ./BUILD/Miner_Build/Linux_arm/Miner -ver"
+	scp -P $(ARM64PORT) -r $(ARM64):$(DEST_FOLDER)EncryptionNodeJSSources/BUILD ./
+
+	ls -l ./$(BUILD_FOLDER)/$(OP_FOLDER)/Linux_arm 
+	ls -l ./$(BUILD_FOLDER)/$(MI_FOLDER)/Linux_arm	
+
 	
 #General cleaning section	
 clean:
+
 	rm -rf $(APPS_FOLDER)
 	rm -rf ${DIST_FOLDER}
 	
@@ -122,6 +123,7 @@ clean:
 	mv ./org/view/ ./
 		
 	rm -rf org
+
 
 #Test Applications
 test:
