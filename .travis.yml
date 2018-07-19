@@ -12,4 +12,5 @@ before_script:
   - ls -l
 
 script:
+    - npm test
     - npm run-script build OS=Linux
