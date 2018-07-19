@@ -16,12 +16,8 @@
  */
 
 //Requires
-const assert = require('assert');
 const addContext = require('mochawesome/addContext');
 const modAmountWorker = require('./AmountWorker.js');
-
-//Default timer for executions of test is 2 minutes
-const maxTimeOut = 2 * 60 * 1000;
 
 describe("Test Amount worker", function () {
 

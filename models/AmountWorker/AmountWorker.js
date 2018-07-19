@@ -44,7 +44,6 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
     var flTargetAmountL = flTargetAmount / 1024;
     var arUnitsLastReached = [];
     var flAmountLastReached = 0.0;
-    var intStaringIndex = 1;
 
     // 0. Remove units without owner
     var arObjUnitsDataList_Owner = [];
@@ -113,7 +112,7 @@ _Method.encodeAmount = function (arObjUnitsDataList, flTargetAmount) {
                 if (objUnitL.value >= flTargetAmountL) {
                     arUnits.push(objUnitL.name);
                     flCurAmount = objUnitL.value;
-                }else{
+                } else {
                     // No unit found
                 }
             }
@@ -133,11 +132,10 @@ _Method.packUnits = function (objAmountReaturnData, encryptor, AddressGen, strCu
     //Decide to encrypt
     if (strTargetAddr !== undefined) {
         //Encrypt unit which is in BS58 with new owner address
-        var encData = encryptor.encryptFilePublicKey
-                (
-                        JSON.stringify(arrUnitsContent),
-                        Buffer.from(Bs58.decode(AddressGen.convertHexDashToBS58(strTargetAddr)))
-                        );
+        var encData = encryptor.encryptFilePublicKey(
+                JSON.stringify(arrUnitsContent),
+                Buffer.from(Bs58.decode(AddressGen.convertHexDashToBS58(strTargetAddr)))
+                );
 
         //Pr  eapare data for storing
         var fsData = {};
