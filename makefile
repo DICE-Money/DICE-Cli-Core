@@ -161,5 +161,10 @@ else
 endif
 endif
 
+normal:
+	make folders obfusticate build test clean || make clean
+
+extended:
+	make folders obfusticate build test buildRemoteArm clean || make clean
 
 .PHONY: build clean
