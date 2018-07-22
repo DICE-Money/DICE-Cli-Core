@@ -93,17 +93,11 @@ _Method.getZeroes = function () {
 _Method.getZeroesFromN = function (diceValue, N) {
     var zeroes = 1;
     var N = parseInt(N);
-    var diceValueL = diceValue;
-
-    if (diceValue.indexOf("/") !== -1) {
-        var diceValueArray = [];
-        diceValueArray = diceValue.split('/');
-        diceValueL = diceValueArray[0] / diceValueArray[1];
-    }
+    var diceValueL = diceValue / 1024;
 
     //Calculate zeroes
     zeroes = N - (Math.log(1 / diceValueL) / Math.log(2));
-    
+
     return zeroes;
 };
 
