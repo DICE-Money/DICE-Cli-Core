@@ -1,7 +1,7 @@
 language: node_js
 node_js:
  - "8"
-
+ 
 before_install:
   - npm install -g nexe
   - npm install -g mocha  
@@ -10,7 +10,10 @@ before_install:
     
 before_script:
   - ls -l
-
 script:
     - npm test
     - npm run-script build OS=Linux
+after_success: npm run coverage
+# Send coverage data to Coveralls
+after_script:
+ - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
