@@ -1,6 +1,6 @@
 {
   "name": "DICE-Money",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "keywords": [
     "util",
     "functional",
@@ -30,7 +30,7 @@
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
     "test": "mocha Apps//Miner//test//functional-test//generalTest.js ./models/AmountWorker/test.js ./models/Encryptor/testEncSign.js --reporter mochawesome",
-    "build":"make normal"
+    "build":"make normal  "
   },
   "devDependencies": {
     "javascript-obfuscator": "^0.14.3",
