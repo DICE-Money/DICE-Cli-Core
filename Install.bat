@@ -7,6 +7,7 @@ git clone https://github.com/DICE-Money/DICE-Cli-Miner.git Apps/Miner
 git clone https://github.com/pollarize/elliptic.git 3rd-modified/elliptic
 
 npm install
+npm link ./3rd-modified/elliptic
 
 npm -i -g nexe
 npm -i -g mocha

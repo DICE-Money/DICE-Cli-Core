@@ -1,14 +1,14 @@
 /node_modules/*
-/BUILD/*
+/BUILD/Operator_Build*
 /dist/*
 /obf/
-/Apps/Miner/dns.json
+/Apps/
+/3rd-modified/
 *.dkeys
 *.dconf
 *.dice
 node_modules/   
 obf/ 
-BUILD/ 
 dist/ 
 dist/ 
 DICE-Cli-Miner/

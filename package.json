@@ -1,6 +1,6 @@
 {
   "name": "DICE-Money",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "keywords": [
     "util",
     "functional",
@@ -19,7 +19,7 @@
   "dependencies": {
     "big-integer": "^1.6.26",
     "bs58": "^4.0.1",
-    "elliptic": "^6.4.0",
+    "elliptic": "file:3rd-modified/elliptic",
     "js-sha3": "^0.6.1",
     "key-encoder": "^1.1.6",
     "mocha": "^5.1.1",
@@ -29,8 +29,10 @@
   },
   "scripts": {
     "start": "node Apps/Miner/index.js -h",
-    "test": "mocha Apps//Miner//test//functional-test//generalTest.js --reporter mochawesome",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha Apps//Miner//test//functional-test//generalTest.js"
+    "test": "mocha Apps//Miner//test//functional-test//generalTest.js ./models/AmountWorker/test.js ./models/Encryptor/testEncSign.js --reporter mochawesome",
+    "build":"make folders obfusticate build test clean",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha Apps//Miner//test//functional-test//generalTest.js ./models/AmountWorker/test.js ./models/Encryptor/testEncSign.js"
+
   },
   "devDependencies": {
     "coveralls": "^3.0.2",

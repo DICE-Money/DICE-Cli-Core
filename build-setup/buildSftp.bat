@@ -14,14 +14,14 @@ echo ##############################
 echo #     BUILD ON ARM32 PC      #
 echo ##############################
 %scp% -P %arm32Port% -r "../obf/Apps" "../obf/models" "../obf/3rd-modified" "../obf/view" %arm32%:%defFolder%DICE/EncryptionNodeJS
-%ssh% -p %arm32Port% %arm32% -t -t "su -l; %defFolder%/DICE/EncryptionNodeJS/BUILD/Operator_Build/Linux_arm/Operator_x86 -ver"
+%ssh% -p %arm32Port% %arm32% -t -t "npm link ./3rd-modified/elliptic; su -l; %defFolder%/DICE/EncryptionNodeJS/BUILD/Operator_Build/Linux_arm/Operator_x86 -ver"
 %scp% -P %arm32Port% -r %arm32%:%defFolder%DICE/EncryptionNodeJS/BUILD ../../obf/
 
 echo ##############################
 echo #     BUILD ON ARM64 PC      #
 echo ##############################
 %scp% -P %arm64Port% -r "../obf/Apps" "../obf/models" "../obf/3rd-modified" "../obf/view" %arm64%:%defFolder%EncryptionNodeJSSources
-%ssh% -p %arm64Port% %arm64% -t -t "cd %defFolder%/EncryptionNodeJSSources; ./build_x64.sh; ./BUILD/Operator_Build/Linux_arm/Operator -ver"
+%ssh% -p %arm64Port% %arm64% -t -t "cd %defFolder%/EncryptionNodeJSSources; ./build_x64.sh; npm link ./3rd-modified/elliptic; ./BUILD/Operator_Build/Linux_arm/Operator -ver"
 %scp% -P %arm64Port% -r %arm64%:%defFolder%EncryptionNodeJSSources/BUILD ../../obf/
 
 echo ##############################

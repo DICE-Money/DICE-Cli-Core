@@ -3,17 +3,22 @@ node_js:
  - "8"
  
 before_install:
-  - npm install  
   - npm install -g nexe
   - npm install -g mocha  
   - npm install -g mochawesome
-  
+  - npm link ./3rd-modified/elliptic
+    
 before_script:
   - ls -l
+
+script:
+    - npm test
+    - npm run-script build OS=Linux
 
 after_success: npm run coverage
 
 # Send coverage data to Coveralls
 after_script:
  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+ 
  
