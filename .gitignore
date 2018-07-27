@@ -1,5 +1,5 @@
 /node_modules/*
-/BUILD/Operator_Build*
+/BUILD/*
 /dist/*
 /obf/
 /Apps/
