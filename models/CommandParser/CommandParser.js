@@ -26,9 +26,14 @@ var _Method = CommandParser.prototype;
 const cOddArgs = 2;
 
 //General Constuctor
-function CommandParser(commandArgs, appArgs) {
+function CommandParser(commandArgs, appArgs, table) {
     this.commandArgs = commandArgs.slice(cOddArgs);
     this.appArgs = appArgs;
+
+    //Table is optional
+    if (table) {
+        this.execFunc = this.getExecFuncByTable(table);
+    }
 }
 
 //Public Methods
@@ -42,7 +47,7 @@ _Method.getExecFuncByTable = function (table) {
                 execFunc = table[i].exec;
                 break;
             }
-        } else if (true === (table[i].args.includes(this.commandArgs[1]))){
+        } else if (true === (table[i].args.includes(this.commandArgs[1]))) {
             this.setDatArgs(table[i], true);
             //Check is program has enought arguments
             if (this.commandArgs.length != 0) {
@@ -54,15 +59,22 @@ _Method.getExecFuncByTable = function (table) {
     return execFunc;
 };
 
+_Method.filterInputArgument = function (argument, filter) {
+    if (!filter) {
+        throw new Error(`Invalid argument ${argument}`);
+    }
+    return argument;
+};
+
 _Method.setDatArgs = function (tableElement, isNexeBuild) {
     var dataSaved = '';
+    var intOffset = 1;
     for (var i = 0; i < tableElement.dataArgs.length; i++) {
         dataSaved = tableElement.dataArgs[i];
-        if (true !== isNexeBuild) {
-            this.appArgs[dataSaved] = this.commandArgs[i + 1];
-        } else {
-            this.appArgs[dataSaved] = this.commandArgs[i + 2];
+        if (true === isNexeBuild) {
+            intOffset = 2;
         }
+        this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset], this.appArgs[dataSaved].filter);
     }
 };
 
@@ -83,6 +95,10 @@ _Method.getArgs = function () {
 
 _Method.getState = function () {
     return this.appStates;
+};
+
+_Method.getExecFunc = function () {
+    return this.execFunc;
 };
 
 module.exports = CommandParser;

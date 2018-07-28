@@ -23,9 +23,9 @@ const modAssert = require("assert");
 //Data stored buffer from console arguments
 const Args =
 {
-    nameOfOwner: undefined,
-    keyPair: undefined,
-    diceUnit: undefined
+    nameOfOwner: { data: undefined, filter: undefined },
+    keyPair: { data: undefined, filter: undefined },
+    configurationFile: { data: undefined, filter: undefined }
 };
 
 const CommandsTable =
@@ -53,10 +53,16 @@ describe("Test general functionality of Command Worker model", function () {
         var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[1].args[0]], Args);
         var help = CommandParser.getHelpString(CommandsTable);
         CommandsTable.forEach(element => {
-            if(help.indexOf(element.help) === -1){
+            if (help.indexOf(element.help) === -1) {
                 throw new Error("Help is not relevant");
             }
         });
+    });
+
+    it("Test arguments", function () {
+        var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "arument1", "argument2", "argument3"], Args, CommandsTable);
+        var arguments = CommandParser.getArgs();
+        console.log(JSON.stringify(arguments));
     });
 
 });
