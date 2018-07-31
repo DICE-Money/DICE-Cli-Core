@@ -60,7 +60,9 @@ _Method.getExecFuncByTable = function (table) {
 };
 
 _Method.filterInputArgument = function (argument, filter) {
-    if (!filter) {
+    //Check filter 
+    // Is data valid by filter ? 
+    if (typeof filter === "function" && false === filter(argument)) {
         throw new Error(`Invalid argument ${argument}`);
     }
     return argument;
@@ -74,7 +76,11 @@ _Method.setDatArgs = function (tableElement, isNexeBuild) {
         if (true === isNexeBuild) {
             intOffset = 2;
         }
-        this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset], this.appArgs[dataSaved].filter);
+        if (this.appArgs[dataSaved]) {
+            this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset], this.appArgs[dataSaved].filter);
+        } else {
+            this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset]);
+        }
     }
 };
 
