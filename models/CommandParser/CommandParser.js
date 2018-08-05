@@ -24,6 +24,81 @@ var _Method = CommandParser.prototype;
 
 //Local const
 const cOddArgs = 2;
+//
+const cCommonFilters = {
+    configurationFile: (data) => {
+        const fs = require("fs");
+        if (fs.existsSync(data)) {
+            var file = fs.readFileSync(data);
+            try {
+                var json = JSON.parse(file);
+                if (json.hasOwnProperty("Name") || json.hasOwnProperty("Keys") && json.hasOwnProperty("Contacts") && json.hasOwnProperty("Operators")) {
+                    return true;
+                }
+            } catch (error) {
+                //false
+            }
+        }
+        return false;
+    },
+    keyPair: (data) => {
+        const fs = require("fs");
+        const addr = require("../AddressCalculator/DigitalAdressCalculator_ECDH.js");
+        var addrInst = new addr();
+        try {
+            var isValidDA = false;
+            if (fs.existsSync(data)) {
+                var json = JSON.parse(fs.readFileSync(data));
+                if (json.hasOwnProperty("privateKey") && json.hasOwnProperty("digitalAddress")) {
+                    isValidDA = addrInst.IsValidAddress(json.digitalAddress);
+                }
+            }
+            return isValidDA;
+        } catch (ex) {
+            return false;
+        }
+    },
+    diceUnit: (data) => {
+        const fs = require("fs");
+        const unit = require("../DICECalculator/DICEUnit.js");
+        var DICE = new unit();
+        if (fs.existsSync(data)) {
+            var file = fs.readFileSync(data, "utf8");
+
+            //Read DICE Unit from file
+            try {
+                DICE = DICE.from(file);
+            } catch (e) {
+                try {
+                    DICE = DICE.fromBS58(file);
+                } catch (ex) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    },
+    digitalAddr: (data) => {
+        const addr = require("../AddressCalculator/DigitalAdressCalculator_ECDH.js");
+        var addrInst = new addr();
+        return isValidDA = addrInst.IsValidAddress(data);
+    },
+    anyString: (data) => { return typeof data === "string" },
+    folderWithUnits: (data) => {
+        const fs = require("fs");
+        if (fs.existsSync(data)) {
+            try {
+                var files = fs.readdirSync(data);
+                return true;
+            } catch (error) {
+                //false;
+            }
+        }
+        return false;
+    },
+    anyNumber: (data) => { return typeof data === "number" }
+};
 
 //General Constuctor
 function CommandParser(commandArgs, appArgs, table) {
@@ -62,7 +137,8 @@ _Method.getExecFuncByTable = function (table) {
 _Method.filterInputArgument = function (argument, filter) {
     //Check filter 
     // Is data valid by filter ? 
-    if (typeof filter === "function" && false === filter(argument)) {
+    if ((typeof filter === "function" && false === filter(argument)) ||
+        (cCommonFilters.hasOwnProperty(filter) && false === cCommonFilters[filter](argument))) {
         throw new Error(`Invalid argument ${argument}`);
     }
     return argument;
@@ -105,6 +181,12 @@ _Method.getState = function () {
 
 _Method.getExecFunc = function () {
     return this.execFunc;
+};
+
+_Method.getCommonFilter = function (strFilter) {
+    if (cCommonFilters.hasOwnProperty(strFilter)) {
+        return cCommonFilters[strFilter];
+    }
 };
 
 module.exports = CommandParser;
