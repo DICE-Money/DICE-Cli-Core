@@ -24,7 +24,25 @@ const modAssert = require("assert");
 const Args =
 {
     nameOfOwner: { data: undefined, filter: (data) => { return typeof data === "string" } },
-    keyPair: { data: undefined, filter: undefined },
+    keyPair: {
+        data: undefined, filter: (data) => {
+            const fs = require("fs");
+            const addr = require("../AddressCalculator/DigitalAdressCalculator_ECDH.js");
+            var addrInst = new addr();
+            try {
+                var isValidDA = false;
+                if (fs.existsSync(data)) {
+                    var json = JSON.parse(fs.readFileSync(data));
+                    if (json.hasOwnProperty("privateKey") && json.hasOwnProperty("digitalAddress")) {
+                        isValidDA = addrInst.IsValidAddress(json.digitalAddress);
+                    }
+                }
+                return isValidDA;
+            } catch (ex) {
+                return false;
+            }
+        }
+    },
     configurationFile: { data: undefined, filter: undefined }
 };
 
@@ -38,7 +56,7 @@ const CommandsTable =
 describe("Test general functionality of Command Worker model", function () {
 
     it("Get function name VALID", function () {
-        var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0],"hello"], Args);
+        var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "hello"], Args);
         var functionName = CommandParser.getExecFuncByTable(CommandsTable);
         modAssert.equal(functionName, CommandsTable[0].exec);
     });
@@ -60,7 +78,7 @@ describe("Test general functionality of Command Worker model", function () {
     });
 
     it("Test arguments", function () {
-        var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "arument1", "argument2", "argument3"], Args, CommandsTable);
+        var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "arument1", "C:\\Development\\DICE-Money\\DICE-Cli-Core\\Apps\\Miner\\keys.dkeys", "argument3"], Args, CommandsTable);
         var arguments = CommandParser.getArgs();
     });
 
