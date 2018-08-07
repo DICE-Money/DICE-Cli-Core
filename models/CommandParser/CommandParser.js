@@ -24,7 +24,6 @@ var _Method = CommandParser.prototype;
 
 //Local const
 const cOddArgs = 2;
-//
 const cCommonFilters = {
     configurationFile: (data) => {
         const fs = require("fs");
@@ -139,7 +138,7 @@ _Method.filterInputArgument = function (argument, filter) {
     // Is data valid by filter ? 
     if ((typeof filter === "function" && false === filter(argument)) ||
         (cCommonFilters.hasOwnProperty(filter) && false === cCommonFilters[filter](argument))) {
-        throw new Error(`Invalid argument ${argument}`);
+        throw new Error(`Invalid argument: "${argument}"`);
     }
     return argument;
 };
@@ -152,10 +151,14 @@ _Method.setDatArgs = function (tableElement, isNexeBuild) {
         if (true === isNexeBuild) {
             intOffset = 2;
         }
-        if (this.appArgs[dataSaved]) {
-            this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset], this.appArgs[dataSaved].filter);
-        } else {
-            this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset]);
+        try {
+            if (this.appArgs[dataSaved]) {
+                this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset], this.appArgs[dataSaved].filter);
+            } else {
+                this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset]);
+            }
+        }catch(error){
+            console.log(error,dataSaved);
         }
     }
 };

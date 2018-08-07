@@ -23,11 +23,11 @@ const modAssert = require("assert");
 //Data stored buffer from console arguments
 const Args =
 {
-    nameOfOwner: { data: undefined, filter: (data) => { return typeof data === "string" } },
+    nameOfOwner: { data: undefined, filter: "anyString" },
     keyPair: {
         data: undefined, filter: "keyPair"
     },
-    configurationFile: { data: undefined, filter: undefined }
+    configurationFile: { data: undefined, filter: "configurationFile" }
 };
 
 const CommandsTable =
@@ -61,7 +61,7 @@ describe("Test general functionality of Command Worker model", function () {
         });
     });
 
-    it.only("Test arguments", function () {
+    it("Test arguments", function () {
         var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "arument1", "C:\\Development\\DICE-Money\\DICE-Cli-Core\\Apps\\Miner\\keys.dkeys", "argument3"], Args, CommandsTable);
         var arguments = CommandParser.getArgs();
     });
