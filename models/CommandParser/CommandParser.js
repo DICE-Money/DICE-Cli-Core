@@ -103,6 +103,7 @@ const cCommonFilters = {
 function CommandParser(commandArgs, appArgs, table) {
     this.commandArgs = commandArgs.slice(cOddArgs);
     this.appArgs = appArgs;
+    this.Errors = [];
 
     //Table is optional
     if (table) {
@@ -111,7 +112,7 @@ function CommandParser(commandArgs, appArgs, table) {
 }
 
 //Public Methods
-_Method.getExecFuncByTable = function (table) {
+_Method.getExecFuncByTable = function (table, funcError) {
     var execFunc = 'ERROR';
     for (var i = 0; i < table.length; i++) {
         if (true === (table[i].args.includes(this.commandArgs[0]))) {
@@ -130,6 +131,14 @@ _Method.getExecFuncByTable = function (table) {
             }
         }
     }
+
+    //If Errors call callback
+    if (execFunc === 'ERROR' || this.Errors.length > 0) {
+        if (typeof funcError === "function") {
+            funcError(this.Errors);
+        }
+    }
+
     return execFunc;
 };
 
@@ -157,8 +166,11 @@ _Method.setDatArgs = function (tableElement, isNexeBuild) {
             } else {
                 this.appArgs[dataSaved] = this.filterInputArgument(this.commandArgs[i + intOffset]);
             }
-        }catch(error){
-            console.log(error,dataSaved);
+        } catch (error) {
+            //Only different from optional arguments
+            if (tableElement.hasOwnProperty("optional") && !tableElement.optional.includes(dataSaved)) {
+                this.Errors.push({ arg: dataSaved, err: error });
+            }
         }
     }
 };

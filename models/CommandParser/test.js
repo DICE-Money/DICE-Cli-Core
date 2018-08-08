@@ -33,27 +33,27 @@ const Args =
 const CommandsTable =
     [
         //Configration and adressbook
-        { args: ['-cCfg', '--createConfiguration'], dataArgs: ['nameOfOwner', 'keyPair', 'configurationFile'], exec: 'funcCreateCfg', help: "Create Configuration of the current owner." },
-        { args: ['-uCfg', '--updateConfiguration'], dataArgs: ['nameOfOwner', 'keyPair', 'configurationFile'], exec: 'funcUpdateCfg', help: "Update Configuration of the current owner.(Do not delete existing contacts and operators!)" },
+        { args: ['-cCfg', '--createConfiguration'], dataArgs: ['nameOfOwner', 'keyPair', 'configurationFile'], optional: ["keyPair"], exec: 'funcCreateCfg', help: "Create Configuration of the current owner." },
+        { args: ['-uCfg', '--updateConfiguration'], dataArgs: ['nameOfOwner', 'keyPair', 'configurationFile'], optional: [], exec: 'funcUpdateCfg', help: "Update Configuration of the current owner.(Do not delete existing contacts and operators!)" },
     ];
 
 describe("Test general functionality of Command Worker model", function () {
 
     it("Get function name VALID", function () {
         var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[0].args[0], "hello"], Args);
-        var functionName = CommandParser.getExecFuncByTable(CommandsTable);
+        var functionName = CommandParser.getExecFuncByTable(CommandsTable, ErrorHandler);
         modAssert.equal(functionName, CommandsTable[0].exec);
     });
 
     it("Get function name INVALID", function () {
         var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[1].args[0]], Args);
-        var functionName = CommandParser.getExecFuncByTable(CommandsTable);
+        var functionName = CommandParser.getExecFuncByTable(CommandsTable, ErrorHandler);
         modAssert.notEqual(functionName, CommandsTable[0].exec);
     });
 
     it("Print Help menu", function () {
         var CommandParser = new modCommandWorker(["odd", "odd", CommandsTable[1].args[0]], Args);
-        var help = CommandParser.getHelpString(CommandsTable);
+        var help = CommandParser.getHelpString(CommandsTable, ErrorHandler);
         CommandsTable.forEach(element => {
             if (help.indexOf(element.help) === -1) {
                 throw new Error("Help is not relevant");
@@ -66,4 +66,9 @@ describe("Test general functionality of Command Worker model", function () {
         var arguments = CommandParser.getArgs();
     });
 
+    function ErrorHandler(errors) {
+        for (const err of errors) {
+            console.log("The argument is invalid:", err.arg);
+        }
+    }
 });
